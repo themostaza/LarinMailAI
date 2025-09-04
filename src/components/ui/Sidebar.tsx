@@ -11,17 +11,26 @@ import {
   LogOut,
   Zap,
   FileText,
-  ExternalLink
+  ExternalLink,
+  BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { logoutAction } from '@/app/manage/actions'
 import type { SidebarItem } from '@/types'
 
 interface SidebarProps {
   className?: string
+  user?: { email?: string } | null
 }
 
 const sidebarItems: SidebarItem[] = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    href: '/manage/dashboard',
+    icon: BarChart3
+  },
   {
     id: 'actions',
     label: 'Actions AI',
@@ -55,16 +64,10 @@ const bottomItems: SidebarItem[] = [
     label: 'Impostazioni',
     href: '/manage/settings',
     icon: Settings
-  },
-  {
-    id: 'logout',
-    label: 'Logout',
-    href: '/logout',
-    icon: LogOut
   }
 ]
 
-export default function Sidebar({ className = '' }: SidebarProps) {
+export default function Sidebar({ className = '', user }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
 
@@ -147,11 +150,8 @@ export default function Sidebar({ className = '' }: SidebarProps) {
                 className="flex items-center gap-2"
               >
                 <h2 className="text-xl font-bold">
-                  Mail<span className="text-[#00D9AA]">AI</span>
+                <span className="text-[#00D9AA]">Larin</span>Mail<span className="text-[#00D9AA]">AI</span>
                 </h2>
-                <span className="text-xs bg-[#00D9AA] text-black px-2 py-1 rounded-full font-medium">
-                  MANAGE
-                </span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -178,6 +178,58 @@ export default function Sidebar({ className = '' }: SidebarProps) {
         {bottomItems.map((item) => (
           <SidebarLink key={item.id} item={item} />
         ))}
+        
+        {/* Logout Button */}
+        <form action={logoutAction}>
+          <motion.button
+            type="submit"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-gray-800 w-full"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+          <LogOut size={20} className="flex-shrink-0" />
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="text-sm font-medium whitespace-nowrap"
+              >
+                Logout
+              </motion.span>
+            )}
+          </AnimatePresence>
+          </motion.button>
+        </form>
+
+        {/* User Info */}
+        {user && (
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-[#00D9AA] rounded-full flex items-center justify-center">
+                <span className="text-black text-sm font-medium">
+                  {user.email?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="flex-1 min-w-0"
+                  >
+                    <p className="text-sm font-medium text-white truncate">
+                      {user.email}
+                    </p>
+                    <p className="text-xs text-gray-400">Online</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
     </motion.aside>
   )

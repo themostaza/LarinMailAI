@@ -1,8 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireAuth } from '@/lib/auth-server'
-import SettingsClient from './SettingsClient'
+import DashboardClient from './DashboardClient'
 
-export default async function SettingsPage() {
+export default async function DashboardPage() {
   const user = await requireAuth()
   
   // Controlla se l'utente ha un account Google connesso
@@ -25,9 +25,9 @@ export default async function SettingsPage() {
   }
 
   return (
-    <SettingsClient 
-      initialConnected={isConnected} 
-      initialAccount={connectedAccount} 
+    <DashboardClient 
+      isConnected={isConnected} 
+      connectedAccount={connectedAccount} 
     />
   )
 }
