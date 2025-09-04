@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MailAI
+
+Un software che esegue una cosa semplice quanto rivoluzionaria: un modulo per la gestione delle email con l'AI.
+
+## Descrizione
+
+MailAI funziona con Gmail e Outlook inizialmente. Non funziona real-time ma impostando delle regole per l'AI nella manipolazione delle mail. Il sistema è scalabile nelle funzionalità nel senso che potranno essere aggiunte azioni da richiedere all'AI.
+
+## Casi d'uso
+
+**Scenario 1:**
+Arriva mail all'azienda e in funzione della documentazione aziendale, l'AI genera una bozza di risposta verificabile da un operatore.
+
+**Scenario 2:**
+Sulla base di regole definite dall'utente l'AI performa l'azione di segnare la mail come letta e/o reindirizzarla alla mail dell'ufficio competente.
+
+## Stack Tecnologico
+
+- Next.js
+- Vercel
+- Supabase  
+- Anthropic
+
+## Design System
+
+- **Tema**: Vercel Dark Theme
+- **Colore Primario**: Verde Supabase (#00D9AA) come colore contrastante
+- **Stile**: Moderno, minimalista, interfaccia figa per mostrare i flussi
 
 ## Getting Started
 
-First, run the development server:
-
+1. Installa le dipendenze:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Avvia il server di sviluppo:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Apri [http://localhost:3000](http://localhost:3000) nel browser.
