@@ -5,11 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ChevronLeft,
   ChevronRight,
-  Settings,
   User,
   LogOut,
-  Zap,
-  BarChart3
+  Zap
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -21,14 +19,7 @@ interface SidebarProps {
   user?: { email?: string } | null
 }
 
-const sidebarItems: SidebarItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    href: '/manage/dashboard',
-    icon: BarChart3
-  }
-]
+const sidebarItems: SidebarItem[] = []
 
 const bottomItems: SidebarItem[] = [
   {
@@ -36,12 +27,6 @@ const bottomItems: SidebarItem[] = [
     label: 'Profilo',
     href: '/manage/profile',
     icon: User
-  },
-  {
-    id: 'settings',
-    label: 'Impostazioni',
-    href: '/manage/settings',
-    icon: Settings
   }
 ]
 

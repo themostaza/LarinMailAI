@@ -78,6 +78,38 @@ export type Database = {
         }
         Relationships: []
       }
+      lfunction_request: {
+        Row: {
+          created_at: string
+          done: boolean | null
+          id: number
+          lfunction_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean | null
+          id?: number
+          lfunction_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          done?: boolean | null
+          id?: number
+          lfunction_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lfunction_request_lfunction_id_fkey"
+            columns: ["lfunction_id"]
+            isOneToOne: false
+            referencedRelation: "larin_functions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_general_lfunction_user_exception: {
         Row: {
           available: boolean | null

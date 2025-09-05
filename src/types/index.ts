@@ -103,11 +103,3 @@ export interface SidebarItem {
   icon: React.ComponentType<{ size?: number; className?: string }>
   badge?: number
 }
-
-export interface DashboardStats {
-  totalEmails: number
-  processedEmails: number
-  pendingEmails: number
-  errorEmails: number
-  averageProcessingTime: number
-}
