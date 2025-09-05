@@ -18,7 +18,7 @@ export default function LoginForm() {
       if (result?.error) {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('Errore durante il login')
     } finally {
       setLoading(false)

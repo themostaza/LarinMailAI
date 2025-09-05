@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
   try {

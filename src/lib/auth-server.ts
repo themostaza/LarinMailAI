@@ -1,7 +1,7 @@
 import { 
   createSupabaseServerClientReadOnly,
   createSupabaseServerClientMutable
-} from './supabase'
+} from './supabase-server'
 import { redirect } from 'next/navigation'
 
 export async function getUser() {

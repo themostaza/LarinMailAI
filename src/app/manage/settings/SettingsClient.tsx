@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Database, LogIn, CheckCircle, AlertCircle, Mail } from 'lucide-react'
+import { LogIn, CheckCircle, AlertCircle, Mail } from 'lucide-react'
 
 interface SettingsClientProps {
   initialConnected: boolean

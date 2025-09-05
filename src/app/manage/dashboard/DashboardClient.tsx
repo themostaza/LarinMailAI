@@ -6,7 +6,6 @@ import {
   Mail, 
   MailOpen, 
   Clock, 
-  TrendingUp, 
   AlertCircle, 
   RefreshCw,
   BarChart3,

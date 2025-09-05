@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
-import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase'
+import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase-server'
 
 export async function GET(request: NextRequest) {
   try {

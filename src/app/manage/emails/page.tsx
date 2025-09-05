@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, RefreshCw, Search, Send, ArrowLeft } from 'lucide-react'
+import { Mail, RefreshCw, Search, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 interface Email {

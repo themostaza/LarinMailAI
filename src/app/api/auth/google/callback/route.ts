@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTokensFromCode } from '@/lib/google-oauth'
-import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase'
+import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase-server'
 import { google } from 'googleapis'
 
 export async function GET(request: NextRequest) {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     // Salva o aggiorna l'account in Supabase collegato all'utente autenticato
     const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : null
 
-    const { data, error: dbError } = await supabaseAdmin
+    const {  error: dbError } = await supabaseAdmin
       .from('user_accounts')
       .upsert({
         user_id: user.id,

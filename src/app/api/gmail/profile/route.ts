@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { google } from 'googleapis'
-import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase'
+import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase-server'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Ottieni l'utente autenticato
     const supabase = await createSupabaseServerClientReadOnly()

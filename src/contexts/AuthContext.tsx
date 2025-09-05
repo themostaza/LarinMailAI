@@ -1,15 +1,15 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
-import { createSupabaseClient } from '@/lib/supabase'
+import { User } from '@supabase/supabase-js'
+import { getCurrentUser, signInAction, signOutAction } from '@/app/auth-actions'
 
 interface AuthContextType {
   user: User | null
-  session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -28,51 +28,57 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createSupabaseClient()
 
-  useEffect(() => {
-    // Ottieni la sessione iniziale
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
+  const refreshUser = async () => {
+    try {
+      const result = await getCurrentUser()
+      if (result.success) {
+        setUser(result.user)
+      } else {
+        setUser(null)
+      }
+    } catch (error) {
+      console.error('Errore nel recuperare l\'utente:', error)
+      setUser(null)
+    } finally {
       setLoading(false)
     }
+  }
 
-    getInitialSession()
-
-    // Ascolta i cambiamenti di autenticazione
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  useEffect(() => {
+    refreshUser()
+  }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-    return { error }
+    try {
+      const result = await signInAction(email, password)
+      if (result.success) {
+        setUser(result.user || null)
+        return { error: null }
+      } else {
+        return { error: result.error }
+      }
+    } catch {
+      return { error: 'Errore durante il login' }
+    }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await signOutAction()
+      setUser(null)
+    } catch (error) {
+      console.error('Errore durante il logout:', error)
+    }
   }
 
   const value = {
     user,
-    session,
     loading,
     signIn,
-    signOut
+    signOut,
+    refreshUser
   }
 
   return (

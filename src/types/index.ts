@@ -1,5 +1,8 @@
 // Tipi per il sistema MailAI
 
+// Esporta i tipi del database Supabase
+export * from './database.types'
+
 // Tipi per le Actions Anthropic
 export interface ActionParameter {
   name: string
@@ -99,7 +102,6 @@ export interface SidebarItem {
   href: string
   icon: React.ComponentType<{ size?: number; className?: string }>
   badge?: number
-  external?: boolean
 }
 
 export interface DashboardStats {

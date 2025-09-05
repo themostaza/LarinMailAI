@@ -6,12 +6,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
-  History,
   User,
   LogOut,
   Zap,
-  FileText,
-  ExternalLink,
   BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
@@ -30,25 +27,6 @@ const sidebarItems: SidebarItem[] = [
     label: 'Dashboard',
     href: '/manage/dashboard',
     icon: BarChart3
-  },
-  {
-    id: 'actions',
-    label: 'Actions AI',
-    href: '/manage/actions',
-    icon: Zap
-  },
-  {
-    id: 'history',
-    label: 'Esecuzioni',
-    href: '/manage/history',
-    icon: History
-  },
-  {
-    id: 'instructions',
-    label: 'Come funziona',
-    href: '/instructions',
-    icon: FileText,
-    external: true
   }
 ]
 
@@ -76,7 +54,7 @@ export default function Sidebar({ className = '', user }: SidebarProps) {
   }
 
   const SidebarLink = ({ item }: { item: SidebarItem }) => {
-    const isActive = !item.external && pathname === item.href
+    const isActive = pathname === item.href
     const Icon = item.icon
 
     const content = (
@@ -96,12 +74,9 @@ export default function Sidebar({ className = '', user }: SidebarProps) {
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              className="truncate flex items-center gap-2"
+              className="truncate"
             >
               {item.label}
-              {item.external && (
-                <ExternalLink size={14} className="flex-shrink-0 opacity-70" />
-              )}
             </motion.span>
           )}
         </AnimatePresence>
@@ -116,14 +91,6 @@ export default function Sidebar({ className = '', user }: SidebarProps) {
         )}
       </motion.div>
     )
-
-    if (item.external) {
-      return (
-        <a href={item.href} target="_blank" rel="noopener noreferrer">
-          {content}
-        </a>
-      )
-    }
 
     return (
       <Link href={item.href}>
@@ -150,7 +117,7 @@ export default function Sidebar({ className = '', user }: SidebarProps) {
                 className="flex items-center gap-2"
               >
                 <h2 className="text-xl font-bold">
-                <span className="text-[#00D9AA]">Larin</span>Mail<span className="text-[#00D9AA]">AI</span>
+                Larin<span className="text-[#00D9AA]">AI</span>
                 </h2>
               </motion.div>
             )}
@@ -175,6 +142,29 @@ export default function Sidebar({ className = '', user }: SidebarProps) {
 
       {/* Bottom Section */}
       <div className="p-4 border-t border-gray-800 space-y-1">
+        {/* CTA Funzionalità */}
+        <Link href="/manage">
+          <motion.div
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#00D9AA]/10 border border-[#00D9AA]/20 text-[#00D9AA] hover:bg-[#00D9AA]/20 transition-all duration-200 mb-3"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Zap size={20} className="flex-shrink-0" />
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="truncate font-medium"
+                >
+                  Funzionalità
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </Link>
+
         {bottomItems.map((item) => (
           <SidebarLink key={item.id} item={item} />
         ))}

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
+import { supabaseAdmin, createSupabaseServerClientReadOnly } from '@/lib/supabase-server'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Ottieni l'utente autenticato
     const supabase = await createSupabaseServerClientReadOnly()
