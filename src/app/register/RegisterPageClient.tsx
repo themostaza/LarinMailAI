@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import LoginForm from './LoginForm'
+import RegisterForm from './RegisterForm'
 
-export default function LoginPageClient() {
+export default function RegisterPageClient() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <motion.div
@@ -23,13 +23,13 @@ export default function LoginPageClient() {
               Mail<span className="text-[#00D9AA]">AI</span>
             </h1>
             <p className="text-gray-400">
-              Accedi al tuo account per gestire le email con l&apos;AI
+              Crea il tuo account per iniziare a gestire le email con l&apos;AI
             </p>
           </motion.div>
         </div>
 
-        {/* Login Form */}
-        <LoginForm />
+        {/* Register Form */}
+        <RegisterForm />
 
         {/* Footer */}
         <motion.div
@@ -39,12 +39,12 @@ export default function LoginPageClient() {
           className="text-center mt-6"
         >
           <p className="text-gray-400 text-sm">
-            Non hai un account?{' '}
+            Hai già un account?{' '}
             <Link 
-              href="/register"
+              href="/login"
               className="text-[#00D9AA] hover:text-[#00D9AA]/80 transition-colors"
             >
-              Registrati qui
+              Accedi qui
             </Link>
           </p>
           <div className="mt-4">

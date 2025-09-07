@@ -7,7 +7,8 @@ import {
   ChevronRight,
   User,
   LogOut,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -17,6 +18,7 @@ import type { SidebarItem } from '@/types'
 interface SidebarProps {
   className?: string
   user?: { email?: string } | null
+  userProfile?: { role?: string | null } | null
 }
 
 const sidebarItems: SidebarItem[] = []
@@ -30,7 +32,7 @@ const bottomItems: SidebarItem[] = [
   }
 ]
 
-export default function Sidebar({ className = '', user }: SidebarProps) {
+export default function Sidebar({ className = '', user, userProfile }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
 
@@ -149,6 +151,31 @@ export default function Sidebar({ className = '', user }: SidebarProps) {
             </AnimatePresence>
           </motion.div>
         </Link>
+
+        {/* SuperAdmin Link - Only show for superadmin users */}
+        {userProfile?.role === 'superadmin' && (
+          <Link href="/superadmin">
+            <motion.div
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all duration-200 mb-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Shield size={20} className="flex-shrink-0" />
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="truncate font-medium"
+                  >
+                    SuperAdmin
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </Link>
+        )}
 
         {bottomItems.map((item) => (
           <SidebarLink key={item.id} item={item} />

@@ -75,6 +75,26 @@ export async function getUserFunctionExceptions(userId: string): Promise<Functio
 }
 
 /**
+ * Recupera le funzioni pubbliche visibili a tutti (per homepage)
+ * Mostra solo le funzioni con generally_visible = true
+ */
+export async function getPublicFunctions(): Promise<FunctionWithPermissions[]> {
+  const functions = await getLarinFunctions()
+  
+  // Filtra solo le funzioni generalmente visibili e applica permissioni di base
+  const publicFunctions: FunctionWithPermissions[] = functions
+    .filter(func => func.generally_visible ?? true)
+    .map(func => ({
+      ...func,
+      visible: true,
+      available: func.generally_available ?? false,
+      hasException: false
+    }))
+  
+  return publicFunctions
+}
+
+/**
  * Recupera le funzioni con le loro permissioni per un utente specifico
  * Logica a due livelli:
  * 1. Livello Generale (generally_visible, generally_available)

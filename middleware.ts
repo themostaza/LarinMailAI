@@ -58,10 +58,10 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Route protette che richiedono autenticazione
-  const protectedRoutes = ['/manage']
+  const protectedRoutes = ['/manage', '/superadmin']
   
   // Route pubbliche che non richiedono autenticazione
-  const publicRoutes = ['/login', '/instructions', '/']
+  const publicRoutes = ['/login', '/register', '/instructions', '/']
 
   const { pathname } = request.nextUrl
 

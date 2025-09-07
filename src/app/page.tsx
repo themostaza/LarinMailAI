@@ -2,6 +2,7 @@ import Link from "next/link";
 import HowItWorks from "@/components/HowItWorks";
 import ContactSection from "@/components/ContactSection";
 import AnimatedText from "@/components/AnimatedText";
+import HomepageFunctions from "@/components/HomepageFunctions";
 
 export default function Home() {
   return (
@@ -42,53 +43,8 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Funzioni Principali */}
-        <div className="mb-16">
-          <h3 className="text-3xl font-bold mb-8 text-white">Funzioni Disponibili</h3>
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Funzione 1 - Archiviazione Automatica */}
-            <div className="p-8 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-[#00D9AA]/30 transition-all duration-300 hover:transform hover:scale-105">
-              <div className="mb-4">
-                <div className="w-12 h-12 bg-[#00D9AA]/20 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-[#00D9AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold mb-3 text-[#00D9AA]">Archiviazione Automatica Documenti da email</h4>
-              </div>
-              <p className="text-gray-400 leading-relaxed mb-4">
-                L&apos;AI analizza automaticamente gli allegati delle tue email Gmail, li classifica 
-                intelligentemente e li archivia nel tuo Google Drive con una struttura organizzata.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full">Gmail</span>
-                <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full">Google Drive</span>
-                <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full">Classificazione AI</span>
-              </div>
-            </div>
-
-            {/* Funzione 2 - Generazione Bozze */}
-            <div className="p-8 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-[#00D9AA]/30 transition-all duration-300 hover:transform hover:scale-105">
-              <div className="mb-4">
-                <div className="w-12 h-12 bg-[#00D9AA]/20 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-[#00D9AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold mb-3 text-[#00D9AA]">Generazione intelligente di  bozze di risposta alle email</h4>
-              </div>
-              <p className="text-gray-400 leading-relaxed mb-4">
-                Genera bozze di risposta personalizzate basate sulla tua documentazione aziendale 
-                utilizzando tecnologia RAG e AI avanzata. Compatibile con Gmail e Outlook.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full">Gmail</span>
-                <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full">Outlook</span>
-                <span className="px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full">RAG AI</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Funzioni Dinamiche dal Database */}
+        <HomepageFunctions className="mb-16" />
 
         {/* Come Funziona */}
         <HowItWorks className="mt-16" delay={0.2} />

@@ -241,7 +241,7 @@ export default function ManagePage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            Gestione <span className="text-[#00D9AA]">Funzionalità</span>
+            Collettore di <span className="text-[#00D9AA]">Funzionalità</span>
           </h1>
           <p className="text-gray-400">
             Attiva e configura le funzionalità AI disponibili per automatizzare i tuoi processi
@@ -277,38 +277,37 @@ export default function ManagePage() {
                     transition={{ delay: index * 0.1 }}
                     className="p-4 bg-[#00D9AA]/5 border border-[#00D9AA]/30 rounded-xl"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <IconWithBackground 
-                          iconName={iconName}
-                          containerSize="md"
-                          variant="primary"
-                        />
-                        <div>
-                          <h3 className="font-semibold text-white">
-                            {activeFunction.given_name || activeFunction.function_name || 'Funzione senza nome'}
-                          </h3>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs text-gray-400">
-                              {activeFunction.function_name || 'Funzione non trovata'}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Attivata il {activationDate}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <button 
-                          className="px-4 py-2 bg-[#00D9AA] text-black rounded-lg text-sm font-medium hover:bg-[#00D9AA]/90 transition-colors"
-                          onClick={() => {
-                            // Qui puoi aggiungere la logica per entrare nella funzione specifica
-                            // Per esempio: router.push(`/larin_functions/${activeFunction.function_slug}/${activeFunction.unique_public_code}`)
-                            console.log('Entrando nella funzione:', activeFunction)
-                          }}
-                        >
-                          Accedi
-                        </button>
+                    {/* Top row: Icon and CTA button */}
+                    <div className="flex items-center justify-between mb-3">
+                      <IconWithBackground 
+                        iconName={iconName}
+                        containerSize="md"
+                        variant="primary"
+                      />
+                      <button 
+                        className="px-4 py-2 bg-[#00D9AA] text-black rounded-lg text-sm font-medium hover:bg-[#00D9AA]/90 transition-colors"
+                        onClick={() => {
+                          // Qui puoi aggiungere la logica per entrare nella funzione specifica
+                          // Per esempio: router.push(`/larin_functions/${activeFunction.function_slug}/${activeFunction.unique_public_code}`)
+                          console.log('Entrando nella funzione:', activeFunction)
+                        }}
+                      >
+                        Accedi
+                      </button>
+                    </div>
+                    
+                    {/* Bottom section: Full width text content */}
+                    <div className="w-full">
+                      <h3 className="font-semibold text-white mb-2">
+                        {activeFunction.given_name || activeFunction.function_name || 'Funzione senza nome'}
+                      </h3>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-400">
+                          {activeFunction.function_name || 'Funzione non trovata'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          Attivata il {activationDate}
+                        </span>
                       </div>
                     </div>
                   </motion.div>

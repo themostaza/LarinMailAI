@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import LoginForm from './LoginForm'
+import VerifyForm from './VerifyForm'
 
-export default function LoginPageClient() {
+export default function VerifyPageClient() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <motion.div
@@ -23,13 +23,13 @@ export default function LoginPageClient() {
               Mail<span className="text-[#00D9AA]">AI</span>
             </h1>
             <p className="text-gray-400">
-              Accedi al tuo account per gestire le email con l&apos;AI
+              Verifica il tuo indirizzo email per completare la registrazione
             </p>
           </motion.div>
         </div>
 
-        {/* Login Form */}
-        <LoginForm />
+        {/* Verify Form */}
+        <VerifyForm />
 
         {/* Footer */}
         <motion.div
@@ -39,22 +39,23 @@ export default function LoginPageClient() {
           className="text-center mt-6"
         >
           <p className="text-gray-400 text-sm">
-            Non hai un account?{' '}
+            Vuoi tornare alla registrazione?{' '}
             <Link 
               href="/register"
               className="text-[#00D9AA] hover:text-[#00D9AA]/80 transition-colors"
             >
-              Registrati qui
+              Clicca qui
             </Link>
           </p>
-          <div className="mt-4">
+          <p className="text-gray-400 text-sm mt-2">
+            Hai già un account?{' '}
             <Link 
-              href="/instructions"
-              className="text-[#00D9AA] hover:text-[#00D9AA]/80 text-sm transition-colors"
+              href="/login"
+              className="text-[#00D9AA] hover:text-[#00D9AA]/80 transition-colors"
             >
-              Scopri come funziona MailAI
+              Accedi qui
             </Link>
-          </div>
+          </p>
         </motion.div>
       </motion.div>
     </div>
