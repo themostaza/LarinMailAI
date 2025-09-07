@@ -28,7 +28,7 @@ export default function Home() {
       <main className="text-center max-w-4xl mx-auto px-8 py-16">
         <div className="mb-12">
           <h2 className="text-5xl font-bold mb-6">
-            Il collettore di <span className="text-[#00D9AA]">funzioni AI</span>
+            Il collettore di <span className="text-[#00D9AA]">strumenti AI</span>
           </h2>
           <div className="gradient-border mb-6"></div>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-8">
