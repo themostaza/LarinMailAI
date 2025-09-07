@@ -20,7 +20,7 @@ export default function VerifyPageClient() {
             transition={{ delay: 0.1 }}
           >
             <h1 className="text-3xl font-bold text-white mb-2">
-              Mail<span className="text-[#00D9AA]">AI</span>
+              Larin<span className="text-[#00D9AA]">AI</span>
             </h1>
             <p className="text-gray-400">
               Verifica il tuo indirizzo email per completare la registrazione

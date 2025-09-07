@@ -101,26 +101,20 @@ export default function VerifyForm() {
         </motion.div>
       )}
 
-      <form action={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-            Email
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00D9AA] focus:ring-1 focus:ring-[#00D9AA] transition-colors"
-              placeholder="inserisci@tuaemail.com"
-              disabled={loading}
-            />
+      {/* Mostra email come informazione */}
+      {email && (
+        <div className="mb-6 p-4 bg-gray-800/50 border border-gray-700 rounded-lg">
+          <div className="flex items-center gap-2 text-gray-300">
+            <Mail size={16} />
+            <span className="text-sm">Codice inviato a:</span>
+            <span className="text-[#00D9AA] font-medium">{email}</span>
           </div>
         </div>
+      )}
+
+      <form action={handleSubmit} className="space-y-4">
+        {/* Campo email nascosto per il form */}
+        <input type="hidden" name="email" value={email} />
 
         <div>
           <label htmlFor="token" className="block text-sm font-medium text-gray-300 mb-2">

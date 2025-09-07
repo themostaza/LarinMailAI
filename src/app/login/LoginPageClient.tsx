@@ -20,10 +20,10 @@ export default function LoginPageClient() {
             transition={{ delay: 0.1 }}
           >
             <h1 className="text-3xl font-bold text-white mb-2">
-              Mail<span className="text-[#00D9AA]">AI</span>
+              Larin<span className="text-[#00D9AA]">AI</span>
             </h1>
             <p className="text-gray-400">
-              Accedi al tuo account per gestire le email con l&apos;AI
+              Accedi al tuo account
             </p>
           </motion.div>
         </div>
@@ -47,14 +47,6 @@ export default function LoginPageClient() {
               Registrati qui
             </Link>
           </p>
-          <div className="mt-4">
-            <Link 
-              href="/instructions"
-              className="text-[#00D9AA] hover:text-[#00D9AA]/80 text-sm transition-colors"
-            >
-              Scopri come funziona MailAI
-            </Link>
-          </div>
         </motion.div>
       </motion.div>
     </div>

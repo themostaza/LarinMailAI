@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MailAI",
-  description: "Gestione intelligente delle email con AI",
+  title: "LarinAI",
+  description: "Strumenti AI",
 };
 
 export default function RootLayout({

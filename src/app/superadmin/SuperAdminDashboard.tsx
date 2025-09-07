@@ -68,6 +68,13 @@ export default function SuperAdminDashboard({}: SuperAdminDashboardProps) {
   const [totalRequests, setTotalRequests] = useState(0)
   const [requestsFilter, setRequestsFilter] = useState<boolean | undefined>(undefined)
   
+  // Invite user modal state
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [selectedPassword, setSelectedPassword] = useState('')
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  
   // Function dialog state
   const [showFunctionDialog, setShowFunctionDialog] = useState(false)
   const [editingFunction, setEditingFunction] = useState<FunctionTableData | null>(null)
@@ -292,6 +299,58 @@ export default function SuperAdminDashboard({}: SuperAdminDashboardProps) {
       }
     } catch (error) {
       console.error('❌ Network error updating request status:', error)
+    }
+  }
+
+  // Password suggestions - puoi personalizzare queste password
+  const passwordSuggestions = [
+    'LarinAI2026!',
+    'Benvenuto@123',
+    'Sicura2026#',
+    'Welcome$456'
+  ]
+
+  // Invite user function
+  const inviteUser = async () => {
+    if (!inviteEmail || !selectedPassword) {
+      setInviteError('Email e password sono obbligatori')
+      return
+    }
+
+    setInviteLoading(true)
+    setInviteError(null)
+
+    try {
+      const response = await fetch('/api/superadmin/invite-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: inviteEmail,
+          password: selectedPassword
+        }),
+      })
+
+      if (response.ok) {
+        // Reset form and close modal
+        setInviteEmail('')
+        setSelectedPassword('')
+        setShowInviteModal(false)
+        
+        // Refresh users data
+        fetchUsersData(currentPage)
+        
+        alert('Invito inviato con successo!')
+      } else {
+        const errorData = await response.json().catch(() => null)
+        setInviteError(errorData?.error || 'Errore durante l\'invio dell\'invito')
+      }
+    } catch (error) {
+      console.error('❌ Network error inviting user:', error)
+      setInviteError('Errore di rete durante l\'invio dell\'invito')
+    } finally {
+      setInviteLoading(false)
     }
   }
 
@@ -540,6 +599,14 @@ export default function SuperAdminDashboard({}: SuperAdminDashboardProps) {
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold">Utenti ({totalUsers})</h3>
             <div className="flex items-center gap-4">
+              {/* Invite User Button */}
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="flex items-center gap-2 bg-[#00D9AA] text-black px-4 py-2 rounded-lg font-medium hover:bg-[#00D9AA]/90 transition-colors"
+              >
+                <Plus size={16} />
+                Invita Utente
+              </button>
               {/* Pagination Controls */}
               <div className="flex items-center gap-2">
                 <button
@@ -1579,6 +1646,128 @@ export default function SuperAdminDashboard({}: SuperAdminDashboardProps) {
 
       {/* Exceptions Sidebar */}
       {renderExceptionsSidebar()}
+
+      {/* Invite User Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-md"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <Plus size={20} className="text-[#00D9AA]" />
+                Invita Nuovo Utente
+              </h3>
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Error Message */}
+            {inviteError && (
+              <div className="mb-4 p-3 bg-red-400/10 border border-red-400/30 rounded-lg text-red-400 text-sm">
+                {inviteError}
+              </div>
+            )}
+
+            {/* Form */}
+            <div className="space-y-4">
+              {/* Email Field */}
+              <div>
+                <label htmlFor="inviteEmail" className="block text-sm font-medium text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="inviteEmail"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00D9AA] focus:ring-1 focus:ring-[#00D9AA] transition-colors"
+                  placeholder="utente@esempio.com"
+                  disabled={inviteLoading}
+                />
+              </div>
+
+              {/* Password Suggestions */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password Suggerite
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {passwordSuggestions.map((password, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setSelectedPassword(password)}
+                      className={`p-2 text-sm rounded-lg border transition-colors ${
+                        selectedPassword === password
+                          ? 'border-[#00D9AA] bg-[#00D9AA]/10 text-[#00D9AA]'
+                          : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
+                      }`}
+                      disabled={inviteLoading}
+                    >
+                      {password}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Password Field */}
+              <div>
+                <label htmlFor="customPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                  Oppure inserisci password personalizzata
+                </label>
+                <input
+                  type="text"
+                  id="customPassword"
+                  value={selectedPassword}
+                  onChange={(e) => setSelectedPassword(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00D9AA] focus:ring-1 focus:ring-[#00D9AA] transition-colors font-mono"
+                  placeholder="Inserisci password personalizzata..."
+                  disabled={inviteLoading}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  La password deve contenere: 8+ caratteri, maiuscola, minuscola, numero e carattere speciale
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowInviteModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  disabled={inviteLoading}
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={inviteUser}
+                  disabled={inviteLoading || !inviteEmail || !selectedPassword}
+                  className="flex-1 bg-[#00D9AA] text-black px-4 py-2 rounded-lg font-medium hover:bg-[#00D9AA]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {inviteLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+                      Invio...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} />
+                      Invia Invito
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
