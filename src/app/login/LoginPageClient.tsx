@@ -19,9 +19,11 @@ export default function LoginPageClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Larin<span className="text-[#00D9AA]">AI</span>
-            </h1>
+            <Link href="/" className="inline-block cursor-pointer hover:opacity-80 transition-opacity">
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Larin<span className="text-[#00D9AA]">AI</span>
+              </h1>
+            </Link>
             <p className="text-gray-400">
               Accedi al tuo account
             </p>
