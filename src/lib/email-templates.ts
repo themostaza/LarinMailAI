@@ -159,9 +159,6 @@ export function createEmailTemplate({ title, content, buttonText, buttonUrl }: E
     
     <!-- Footer -->
     <div class="footer">
-      <div class="footer-text">
-        Grazie per aver scelto LarinAI
-      </div>
       <div class="footer-brand">
         <span class="brand-name">LarinAI</span> è un brand di © Larin Srl – P.iva 01144900253
       </div>

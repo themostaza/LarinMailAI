@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 interface ContactSectionProps {
   className?: string
@@ -17,6 +18,44 @@ export default function ContactSection({
   description = "Ogni azienda ha esigenze uniche. Raccontaci quali altri processi vorresti automatizzare e creeremo una soluzione personalizzata per te.",
   buttonText = "Richiedi Automazione Personalizzata"
 }: ContactSectionProps) {
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/contact/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, message }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore durante l\'invio')
+      }
+
+      setSuccess(true)
+      setEmail('')
+      setMessage('')
+      
+      // Reset success message dopo 5 secondi
+      setTimeout(() => setSuccess(false), 5000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore durante l\'invio')
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,26 +69,54 @@ export default function ContactSection({
           {description}
         </p>
         
-        <form className="space-y-6 mb-8">
+        {/* Messaggi di stato */}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-green-400/10 border border-green-400/30 rounded-lg text-green-400 text-center"
+          >
+            ✓ Richiesta inviata con successo! Ti ricontatteremo presto.
+          </motion.div>
+        )}
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-red-400/10 border border-red-400/30 rounded-lg text-red-400 text-center"
+          >
+            ⚠️ {error}
+          </motion.div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6 mb-8">
           <input
             type="email"
             required
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="La tua email aziendale"
           />
           
           <textarea
             rows={4}
             required
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent resize-none"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            disabled={loading}
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="Descrivi le tue necessità di automazione (es. gestione clienti, reportistica automatica, integrazione CRM...)"
           />
           
           <button
             type="submit"
-            className="w-full bg-[#00D9AA] text-black px-8 py-4 rounded-lg font-semibold hover:bg-[#00D9AA]/90 transition-colors"
+            disabled={loading || !email || !message}
+            className="w-full bg-[#00D9AA] text-black px-8 py-4 rounded-lg font-semibold hover:bg-[#00D9AA]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#00D9AA]"
           >
-            {buttonText}
+            {loading ? 'Invio in corso...' : buttonText}
           </button>
         </form>
         
