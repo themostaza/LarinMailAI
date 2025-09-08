@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import IconSelect from '@/components/ui/IconSelect'
 import { 
   Users,
   Shield, 
@@ -1358,23 +1359,11 @@ export default function SuperAdminDashboard({}: SuperAdminDashboardProps) {
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Icona Lucide
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={functionFormData.lucide_react_icon}
-                      onChange={(e) => setFunctionFormData(prev => ({ ...prev, lucide_react_icon: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                      placeholder="Mail, Zap, Settings..."
-                    />
-                    <button
-                      type="button"
-                      onClick={() => window.open('https://lucide.dev/icons/', '_blank')}
-                      className="px-3 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors flex items-center justify-center"
-                      title="Apri catalogo icone Lucide"
-                    >
-                      <ExternalLink size={16} />
-                    </button>
-                  </div>
+                  <IconSelect
+                    value={functionFormData.lucide_react_icon}
+                    onChange={(iconName) => setFunctionFormData(prev => ({ ...prev, lucide_react_icon: iconName }))}
+                    placeholder="Seleziona un'icona per la funzione"
+                  />
                 </div>
                 
                 <div className="flex gap-4">

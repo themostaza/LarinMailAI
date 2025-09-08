@@ -437,7 +437,7 @@ export default function ManagePage() {
                                 disabled={isRequesting}
                                 className="px-4 py-2 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-medium hover:bg-orange-500/30 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                {isRequesting ? 'Invio...' : 'Richiedi accesso'}
+                                {isRequesting ? 'Invio...' : 'Richiedi'}
                               </button>
                             )
                           })()
@@ -596,7 +596,7 @@ export default function ManagePage() {
                             className="flex items-center gap-2 px-6 py-3 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-medium hover:bg-orange-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Lock size={16} />
-                            {isRequesting ? 'Invio richiesta...' : 'Richiedi accesso'}
+                            {isRequesting ? 'Invio richiesta...' : 'Richiedi'}
                           </button>
                         )
                       })()

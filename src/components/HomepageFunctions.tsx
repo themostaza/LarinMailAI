@@ -272,7 +272,7 @@ export default function HomepageFunctions({ className = '' }: HomepageFunctionsP
                       onClick={handleRequestAccess}
                       className="flex items-center gap-2 px-6 py-3 bg-[#00D9AA] text-black rounded-lg font-medium hover:bg-[#00D9AA]/90 transition-colors"
                     >
-                      Richiedi Accesso
+                      Richiedi
                     </button>
                   </div>
                 </>

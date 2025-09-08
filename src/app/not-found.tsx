@@ -55,7 +55,7 @@ export default function NotFound() {
           </p>
           <p className="text-gray-500 text-sm">
             Torna alla homepage e continua a gestire le tue email con{' '}
-            <span className="text-[#00D9AA] font-semibold">MailAI</span>
+            <span className="text-[#00D9AA] font-semibold">LarinAI</span>
           </p>
         </motion.div>
 

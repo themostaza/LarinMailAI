@@ -8,19 +8,19 @@ export function isValidIcon(iconName: string): boolean {
 }
 
 /**
- * Restituisce un nome di icona valido, con fallback a 'settings' se non trovata
+ * Restituisce un nome di icona valido, con fallback a 'Settings' se non trovata
  */
 export function getValidIconName(iconName: string | null | undefined): string {
-  if (!iconName) return 'settings'
+  if (!iconName) return 'Settings'
   
   // Controlla se l'icona esiste
   if (isValidIcon(iconName)) {
     return iconName
   }
   
-  // Fallback a 'settings' se l'icona non esiste
-  console.warn(`Icona '${iconName}' non trovata, usando fallback 'settings'`)
-  return 'settings'
+  // Fallback a 'Settings' se l'icona non esiste
+  console.warn(`Icona '${iconName}' non trovata, usando fallback 'Settings'`)
+  return 'Settings'
 }
 
 /**
