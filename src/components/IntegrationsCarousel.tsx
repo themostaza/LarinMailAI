@@ -93,8 +93,8 @@ export default function IntegrationsCarousel({ className = '' }: IntegrationsCar
         transition={{ delay: 0.1 }}
         className="text-center mb-8"
       >
-        <h3 className="text-2xl font-bold text-white mb-2">Integriamo con i tuoi strumenti preferiti</h3>
-        <p className="text-gray-400 text-sm">Connetti LarinAI con le piattaforme che usi ogni giorno</p>
+        <h3 className="text-2xl font-bold text-white mb-2">Ci integriamo con i tuoi strumenti preferiti</h3>
+        <p className="text-gray-400 text-sm">LarinAI è connessa alle piattaforme che usi ogni giorno</p>
       </motion.div>
 
       <div className="relative">
