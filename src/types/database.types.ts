@@ -156,6 +156,7 @@ export type Database = {
           id: number
           lfunction_id: string | null
           unique_public_code: string | null
+          unique_public_code_uuid: string | null
           user_id: string | null
         }
         Insert: {
@@ -165,6 +166,7 @@ export type Database = {
           id?: number
           lfunction_id?: string | null
           unique_public_code?: string | null
+          unique_public_code_uuid?: string | null
           user_id?: string | null
         }
         Update: {
@@ -174,6 +176,7 @@ export type Database = {
           id?: number
           lfunction_id?: string | null
           unique_public_code?: string | null
+          unique_public_code_uuid?: string | null
           user_id?: string | null
         }
         Relationships: [

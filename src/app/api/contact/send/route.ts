@@ -45,13 +45,7 @@ export async function POST(request: NextRequest) {
       `
     })
 
-    // Invia l'email a paolo@larin.it
-    const data = await resend.emails.send({
-      from: 'LarinAI <noreply@larinai.it>',
-      to: ['paolo@larin.it'],
-      subject: `LarinAI - nuova richiesta da ${email}`,
-      html: emailHtml,
-    })
+ 
 
     return NextResponse.json({ 
       success: true, 

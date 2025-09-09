@@ -20,8 +20,7 @@ import {
   Plus,
   Edit,
   Trash2,
-  RefreshCw,
-  ExternalLink
+  RefreshCw
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import type { SuperAdminMetrics, UserTableData, FunctionTableData, FunctionExceptionUser, RequestTableData } from '@/lib/superadmin-queries'

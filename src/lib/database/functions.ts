@@ -27,11 +27,13 @@ export interface ActiveFunctionWithDetails {
   lfunction_id: string | null
   given_name: string | null
   unique_public_code: string | null
+  unique_public_code_uuid: string | null
   created_at: string
   edited_at: string | null
   // Dati della funzione associata
   function_name: string | null
   function_slug: string | null
+  function_unique_ui_code: string | null
   lucide_react_icon: string | null
   function_body: unknown
 }
@@ -187,11 +189,13 @@ export async function getUserActiveFunctions(userId: string): Promise<ActiveFunc
       lfunction_id,
       given_name,
       unique_public_code,
+      unique_public_code_uuid,
       created_at,
       edited_at,
       larin_functions (
         name,
         slug,
+        unique_ui_code,
         lucide_react_icon,
         body
       )
@@ -211,10 +215,12 @@ export async function getUserActiveFunctions(userId: string): Promise<ActiveFunc
     lfunction_id: item.lfunction_id,
     given_name: item.given_name,
     unique_public_code: item.unique_public_code,
+    unique_public_code_uuid: item.unique_public_code_uuid,
     created_at: item.created_at,
     edited_at: item.edited_at,
     function_name: item.larin_functions?.name || null,
     function_slug: item.larin_functions?.slug || null,
+    function_unique_ui_code: item.larin_functions?.unique_ui_code || null,
     lucide_react_icon: item.larin_functions?.lucide_react_icon || null,
     function_body: item.larin_functions?.body || null
   }))

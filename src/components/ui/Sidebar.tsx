@@ -32,7 +32,7 @@ const bottomItems: SidebarItem[] = [
   }
 ]
 
-export default function Sidebar({ className = '', user, userProfile }: SidebarProps) {
+export default function Sidebar({ className = '', userProfile }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
 
@@ -205,33 +205,6 @@ export default function Sidebar({ className = '', user, userProfile }: SidebarPr
           </motion.button>
         </form>
 
-        {/* User Info */}
-        {user && (
-          <div className="mt-4 pt-4 border-t border-gray-800">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#00D9AA] rounded-full flex items-center justify-center">
-                <span className="text-black text-sm font-medium">
-                  {user.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <AnimatePresence>
-                {!isCollapsed && (
-                  <motion.div
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="flex-1 min-w-0"
-                  >
-                    <p className="text-sm font-medium text-white truncate">
-                      {user.email}
-                    </p>
-                    <p className="text-xs text-gray-400">Online</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        )}
       </div>
     </motion.aside>
   )

@@ -69,7 +69,7 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
       } else {
         setError(data.error || 'Errore durante il cambio password')
       }
-    } catch (error) {
+    } catch {
       setError('Errore di connessione. Riprova più tardi.')
     } finally {
       setIsLoading(false)

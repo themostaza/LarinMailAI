@@ -174,8 +174,10 @@ export default function ManagePage() {
             edited_at: null,
             given_name: data.activation.given_name,
             unique_public_code: data.activation.unique_public_code,
+            unique_public_code_uuid: data.activation.unique_public_code_uuid,
             function_name: data.activation.function_name,
             function_slug: data.activation.function_slug,
+            function_unique_ui_code: activatingFunction.unique_ui_code,
             lucide_react_icon: data.activation.lucide_react_icon,
             function_body: activatingFunction.body
           }
@@ -287,9 +289,10 @@ export default function ManagePage() {
                       <button 
                         className="px-4 py-2 bg-[#00D9AA] text-black rounded-lg text-sm font-medium hover:bg-[#00D9AA]/90 transition-colors"
                         onClick={() => {
-                          // Qui puoi aggiungere la logica per entrare nella funzione specifica
-                          // Per esempio: router.push(`/larin_functions/${activeFunction.function_slug}/${activeFunction.unique_public_code}`)
-                          console.log('Entrando nella funzione:', activeFunction)
+                          // Apri il link in una nuova tab usando il path dinamico con specific_id
+                          if (activeFunction.function_unique_ui_code && activeFunction.unique_public_code_uuid) {
+                            window.open(`/lai/${activeFunction.function_unique_ui_code}/${activeFunction.unique_public_code_uuid}`, '_blank')
+                          }
                         }}
                       >
                         Accedi

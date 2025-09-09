@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         given_name: given_name.trim(),
         unique_public_code: uniquePublicCode
       })
-      .select('id, unique_public_code, given_name, created_at')
+      .select('id, unique_public_code, unique_public_code_uuid, given_name, created_at')
       .single()
 
     if (error) {

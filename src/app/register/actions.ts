@@ -132,7 +132,6 @@ export async function registerAction(formData: FormData) {
 export async function verifyOtpAction(formData: FormData) {
   const email = formData.get('email') as string
   const token = formData.get('token') as string
-  const password = formData.get('password') as string
 
   if (!email || !token) {
     return { error: 'Email e codice di verifica sono obbligatori' }
