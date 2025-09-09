@@ -85,7 +85,7 @@ export default function HomepageFunctions({ className = '' }: HomepageFunctionsP
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h3 className="text-3xl font-bold mb-8 text-white">Funzioni Disponibili</h3>
+          <h3 className="text-3xl font-bold mb-8 text-white">1 abbonamento, 15+ strumenti.</h3>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D9AA]"></div>

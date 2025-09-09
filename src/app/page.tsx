@@ -1,8 +1,8 @@
 import Link from "next/link";
-import HowItWorks from "@/components/HowItWorks";
 import ContactSection from "@/components/ContactSection";
 import AnimatedText from "@/components/AnimatedText";
 import HomepageFunctions from "@/components/HomepageFunctions";
+import IntegrationsCarousel from "@/components/IntegrationsCarousel";
 
 export default function Home() {
   return (
@@ -43,11 +43,11 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* Sezione Integrazioni */}
+        <IntegrationsCarousel className="mb-16" />
+
         {/* Funzioni Dinamiche dal Database */}
         <HomepageFunctions className="mb-16" />
-
-        {/* Come Funziona */}
-        <HowItWorks className="mt-16" delay={0.2} />
 
         {/* Sezione Contatto */}
         <ContactSection 

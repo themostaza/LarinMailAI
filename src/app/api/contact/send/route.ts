@@ -45,11 +45,18 @@ export async function POST(request: NextRequest) {
       `
     })
 
- 
+    // Invia l'email a paolo@neocode.dev
+    const data = await resend.emails.send({
+      from: 'LarinAI <noreply@larinai.it>',
+      to: ['paolo@neocode.dev'],
+      subject: 'Nuova richiesta da LarinAI',
+      html: emailHtml,
+    })
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Richiesta inviata con successo!' 
+      message: 'Richiesta inviata con successo!',
+      emailId: data.data?.id
     })
   } catch (error) {
     console.error('Errore invio richiesta:', error)
