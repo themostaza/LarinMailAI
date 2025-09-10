@@ -8,7 +8,6 @@ import {
   Mic,
   FileText,
   Users,
-  Clock,
   Play,
   CheckCircle,
   Calendar,
@@ -22,7 +21,41 @@ import {
   FileDown
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { getFunctionBySpecificId, updateFunctionGivenName } from './actions'
+import { 
+  getFunctionBySpecificId, 
+  updateFunctionGivenName,
+  uploadAudioFile,
+  processTranscriptionWithAssemblyAI,
+  getTranscriptions,
+  getTranscription,
+  updateTranscriptionTitle
+} from './actions'
+import { Tables } from '@/types/database.types'
+
+type TranscriptionRow = Tables<'_lf_transcriptions'>
+
+// Tipo per i dati AssemblyAI
+interface AssemblyAIWord {
+  text: string;
+  start: number;
+  end: number;
+  confidence: number;
+  speaker?: string;
+}
+
+interface AssemblyAIData {
+  id?: string;
+  text?: string;
+  words?: AssemblyAIWord[];
+  audio_duration?: number;
+  language_confidence?: number;
+  acoustic_model?: string;
+  speaker_labels?: boolean;
+  sentiment_analysis?: boolean;
+  auto_highlights?: boolean;
+  language_code?: string;
+  [key: string]: unknown; // Per altri campi non tipizzati
+}
 
 type TabType = 'intro' | 'esecuzioni'
 type ViewType = 'main' | 'transcription'
@@ -50,9 +83,14 @@ export default function TranscriptionPage({ params }: PageProps) {
   // Stati per la trascrizione
   const [transcriptionTitle, setTranscriptionTitle] = useState<string>('')
   const [isEditingTranscriptionTitle, setIsEditingTranscriptionTitle] = useState<boolean>(false)
+  const [isSavingTranscriptionTitle, setIsSavingTranscriptionTitle] = useState<boolean>(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false)
   const [isExistingTranscription, setIsExistingTranscription] = useState<boolean>(false)
+  const [currentTranscriptionId, setCurrentTranscriptionId] = useState<string | null>(null)
+  const [transcriptions, setTranscriptions] = useState<TranscriptionRow[]>([])
+  const [currentTranscriptionData, setCurrentTranscriptionData] = useState<TranscriptionRow | null>(null)
+  const [processingProgress, setProcessingProgress] = useState<string>('')
   
   // Stati per il player audio
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
@@ -84,6 +122,20 @@ export default function TranscriptionPage({ params }: PageProps) {
     }
 
     fetchFunctionData()
+  }, [user, resolvedParams.specific_id])
+
+  // Carica le trascrizioni esistenti
+  useEffect(() => {
+    const fetchTranscriptions = async () => {
+      if (!user?.id || !resolvedParams.specific_id) return
+
+      const result = await getTranscriptions(user.id, resolvedParams.specific_id)
+      if (result.success && result.data) {
+        setTranscriptions(result.data)
+      }
+    }
+
+    fetchTranscriptions()
   }, [user, resolvedParams.specific_id])
 
   // Apre il dialog per modificare il titolo
@@ -123,6 +175,48 @@ export default function TranscriptionPage({ params }: PageProps) {
     setIsDialogOpen(false)
   }
 
+  // Salva il titolo della trascrizione
+  const saveTranscriptionTitle = async (newTitle: string) => {
+    if (!user?.id || !currentTranscriptionId || newTitle.trim() === (currentTranscriptionData?.title || '')) {
+      return
+    }
+
+    setIsSavingTranscriptionTitle(true)
+    
+    try {
+      const result = await updateTranscriptionTitle(currentTranscriptionId, user.id, newTitle.trim())
+      
+      if (result.success && result.data) {
+        // Aggiorna il titolo nello stato locale
+        setTranscriptionTitle(result.data.title)
+        
+        // Aggiorna anche i dati della trascrizione corrente
+        if (currentTranscriptionData) {
+          setCurrentTranscriptionData({
+            ...currentTranscriptionData,
+            title: result.data.title
+          })
+        }
+        
+        // Ricarica la lista delle trascrizioni per mantenere tutto sincronizzato
+        const updatedTranscriptions = await getTranscriptions(user.id, resolvedParams.specific_id)
+        if (updatedTranscriptions.success && updatedTranscriptions.data) {
+          setTranscriptions(updatedTranscriptions.data)
+        }
+      } else {
+        console.error('Errore nel salvare il titolo della trascrizione:', result.error)
+        // Ripristina il titolo precedente in caso di errore
+        setTranscriptionTitle(currentTranscriptionData?.title || 'Trascrizione senza titolo')
+      }
+    } catch (error) {
+      console.error('Errore nel salvare il titolo della trascrizione:', error)
+      // Ripristina il titolo precedente in caso di errore
+      setTranscriptionTitle(currentTranscriptionData?.title || 'Trascrizione senza titolo')
+    } finally {
+      setIsSavingTranscriptionTitle(false)
+    }
+  }
+
   // Funzioni per la vista trascrizione
   const openNewTranscription = () => {
     const today = new Date().toLocaleDateString('it-IT')
@@ -133,15 +227,21 @@ export default function TranscriptionPage({ params }: PageProps) {
     setIsExistingTranscription(false)
   }
 
-  const openExistingTranscription = (title: string) => {
-    setTranscriptionTitle(title)
+  const openExistingTranscription = async (transcriptionId: string) => {
+    if (!user?.id) return
+
+    const result = await getTranscription(transcriptionId, user.id)
+    if (result.success && result.data) {
+      const transcription = result.data
+      setCurrentTranscriptionData(transcription)
+      setTranscriptionTitle(transcription.title || 'Trascrizione senza titolo')
+      setCurrentTranscriptionId(transcriptionId)
     setCurrentView('transcription')
-    setIsTranscribing(false) // Trascrizione già completata
-    setUploadedFile(null) // Non mostriamo l'upload per trascrizioni esistenti
-    setIsExistingTranscription(true) // È una trascrizione esistente
-    // Simulo un file audio per demo - in futuro verrà caricato dal database
-    setAudioUrl('/demo-audio.mp3') // URL placeholder
-    // Qui in futuro caricheremo i dati esistenti
+      setIsTranscribing(false)
+      setUploadedFile(null)
+      setIsExistingTranscription(true)
+      setAudioUrl(transcription.audio_file_url || '')
+    }
   }
 
   const backToMain = () => {
@@ -156,10 +256,71 @@ export default function TranscriptionPage({ params }: PageProps) {
     }
   }
 
-  const startTranscription = () => {
-    if (!uploadedFile) return
+  const startTranscription = async () => {
+    if (!uploadedFile || !user?.id) return
+
     setIsTranscribing(true)
-    // Qui implementeremo la logica di trascrizione
+    setProcessingProgress('Caricamento file audio e creazione trascrizione...')
+
+    try {
+      // Step 1: Carica il file audio e crea record trascrizione tramite API
+      const uploadResult = await uploadAudioFile(
+        uploadedFile,
+        transcriptionTitle,
+        user.id,
+        resolvedParams.specific_id
+      )
+
+      if (!uploadResult.success || !uploadResult.data) {
+        throw new Error(uploadResult.error || 'Errore nel caricamento del file')
+      }
+
+      const transcriptionId = uploadResult.data.id
+      const audioUrl = uploadResult.data.audioUrl
+      
+      setCurrentTranscriptionId(transcriptionId)
+      setProcessingProgress('Avvio trascrizione AI...')
+
+      // Step 2: Processa con AssemblyAI
+      const processResult = await processTranscriptionWithAssemblyAI(
+        transcriptionId,
+        audioUrl,
+        user.id
+      )
+
+      if (processResult.success) {
+        setProcessingProgress('Trascrizione completata!')
+        
+        // Reload transcriptions list
+        const updatedTranscriptions = await getTranscriptions(user.id, resolvedParams.specific_id)
+        if (updatedTranscriptions.success && updatedTranscriptions.data) {
+          setTranscriptions(updatedTranscriptions.data)
+        }
+
+        // Load the completed transcription
+        const completedTranscription = await getTranscription(transcriptionId, user.id)
+        if (completedTranscription.success && completedTranscription.data) {
+          setCurrentTranscriptionData(completedTranscription.data)
+          setIsExistingTranscription(true)
+          setAudioUrl(completedTranscription.data.audio_file_url || '')
+        }
+
+        setTimeout(() => {
+          setIsTranscribing(false)
+          setProcessingProgress('')
+        }, 2000)
+      } else {
+        throw new Error(processResult.error || 'Errore nella trascrizione')
+      }
+    } catch (error) {
+      console.error('Errore nella trascrizione:', error)
+      setProcessingProgress(`Errore: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`)
+      
+      setTimeout(() => {
+        setIsTranscribing(false)
+        setProcessingProgress('')
+      }, 3000)
+    }
   }
 
   // Funzioni per il player audio
@@ -202,44 +363,27 @@ export default function TranscriptionPage({ params }: PageProps) {
   }
 
   // Funzioni per gestire la trascrizione
-  const transcriptionText = `Trascrizione della riunione - ${transcriptionTitle}
+  const getTranscriptionText = () => {
+    if (!currentTranscriptionData?.data) {
+      return `Trascrizione di ${transcriptionTitle}
 
-Durata: 2h 15min
-Data: ${new Date().toLocaleDateString('it-IT')}
+Nessun dato di trascrizione disponibile.`
+    }
 
----
+    const data = currentTranscriptionData.data as AssemblyAIData
+    
+    // Se c'è il testo completo da AssemblyAI
+    if (data.text) {
+      return data.text
+    }
 
-Partecipanti: Marco Rossi, Laura Bianchi, Giuseppe Verdi
+    // Altrimenti mostra un messaggio di fallback
+    return `Trascrizione di ${transcriptionTitle}
 
-[00:00:15] Marco: Buongiorno a tutti, iniziamo con il primo punto all'ordine del giorno.
+Elaborazione completata ma dati non disponibili.`
+  }
 
-[00:01:30] Laura: Perfetto, per quanto riguarda il progetto Alpha, abbiamo completato la fase di analisi e siamo pronti per passare allo sviluppo.
-
-[00:02:45] Giuseppe: Ottimo lavoro Laura. Vorrei aggiungere che abbiamo identificato alcune criticità che dovremmo affrontare prima di procedere.
-
-[00:04:20] Marco: Puoi essere più specifico Giuseppe?
-
-[00:05:10] Giuseppe: Certamente. Il primo problema riguarda l'integrazione con il sistema legacy, il secondo è relativo alle performance durante i picchi di carico.
-
-[00:07:30] Laura: Per l'integrazione, propongo di creare un layer di astrazione che ci permetta di interfacciarci con il sistema esistente senza modificarlo drasticamente.
-
-[00:09:15] Marco: Mi sembra una soluzione sensata. E per le performance?
-
-[00:10:45] Giuseppe: Dovremmo implementare un sistema di caching distribuito e ottimizzare le query del database.
-
----
-
-DECISIONI PRESE:
-- Implementare layer di astrazione per integrazione legacy
-- Sviluppare sistema di caching distribuito
-- Ottimizzare query database prima del rilascio
-
-ACTION ITEMS:
-- Laura: Progettare architettura layer di astrazione (Scadenza: 20/01/2024)
-- Giuseppe: Implementare sistema di caching (Scadenza: 25/01/2024)
-- Marco: Coordinare ottimizzazione database (Scadenza: 22/01/2024)
-
-PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
+  const transcriptionText = getTranscriptionText()
 
   const copyTranscription = async () => {
     try {
@@ -429,7 +573,7 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Trascrizioni</p>
-              <p className="text-2xl font-bold text-white">127</p>
+              <p className="text-2xl font-bold text-white">{transcriptions.length}</p>
             </div>
             <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-full flex items-center justify-center">
               <FileText size={24} className="text-blue-400" />
@@ -440,14 +584,18 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
         <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Ore Trascritte</p>
-              <p className="text-2xl font-bold text-white">284h</p>
+              <p className="text-sm text-gray-400">MB Elaborati</p>
+              <p className="text-2xl font-bold text-white">
+                {Math.round(transcriptions.reduce((acc, t) => acc + (t.audio_file_length || 0), 0) * 100) / 100} MB
+              </p>
             </div>
             <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-full flex items-center justify-center">
-              <Clock size={24} className="text-purple-400" />
+              <File size={24} className="text-purple-400" />
             </div>
           </div>
-          <p className="text-xs text-blue-400 mt-2">Media 2.2h per trascrizione</p>
+          <p className="text-xs text-blue-400 mt-2">
+            Media {transcriptions.length > 0 ? `${Math.round((transcriptions.reduce((acc, t) => acc + (t.audio_file_length || 0), 0) / transcriptions.length) * 100) / 100} MB` : '0 MB'} per trascrizione
+          </p>
         </div>
 
       </div>
@@ -461,53 +609,71 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
               <tr className="border-b border-gray-700">
                 <th className="text-left py-3 px-4 font-medium text-gray-300">Titolo</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-300">Data</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-300">Minutaggio</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-300">Dimensione</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-300">Stato</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-300">Azioni</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                { title: 'Riunione Strategica Q1 2024', date: '2024-01-15', duration: '2h 15min', status: 'Completata' },
-                { title: 'Review Progetto Alpha', date: '2024-01-14', duration: '1h 45min', status: 'Completata' },
-                { title: 'Standup Team Development', date: '2024-01-14', duration: '30min', status: 'Completata' },
-                { title: 'Presentazione Cliente Beta', date: '2024-01-13', duration: '1h 20min', status: 'Completata' },
-                { title: 'All-Hands Meeting', date: '2024-01-12', duration: '3h 10min', status: 'Completata' },
-                { title: 'Brainstorming Marketing', date: '2024-01-11', duration: '1h 50min', status: 'In elaborazione' },
-              ].map((transcription, index) => (
-                <tr key={index} className="border-b border-gray-800 hover:bg-gray-800/30">
-                  <td className="py-3 px-4 text-white font-medium">{transcription.title}</td>
+              {transcriptions.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 px-4 text-center text-gray-400">
+                    Nessuna trascrizione trovata. Clicca su &quot;+ nuova trascrizione&quot; per iniziare.
+                  </td>
+                </tr>
+              ) : (
+                transcriptions.map((transcription) => {
+                  const statusMap = {
+                    'elaborato': { label: 'Completata', color: 'bg-green-500/20 text-green-400 border border-green-500/30' },
+                    'elaborazione': { label: 'In elaborazione', color: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' },
+                    'errore': { label: 'Errore', color: 'bg-red-500/20 text-red-400 border border-red-500/30' }
+                  }
+                  
+                  const statusInfo = statusMap[transcription.status as keyof typeof statusMap] || 
+                    { label: transcription.status || 'Sconosciuto', color: 'bg-gray-500/20 text-gray-400 border border-gray-500/30' }
+
+                  return (
+                    <tr key={transcription.id} className="border-b border-gray-800 hover:bg-gray-800/30">
+                      <td className="py-3 px-4 text-white font-medium">
+                        {transcription.title || 'Trascrizione senza titolo'}
+                      </td>
                   <td className="py-3 px-4 text-gray-400 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} />
-                      {transcription.date}
+                          {new Date(transcription.created_at).toLocaleDateString('it-IT')}
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-gray-300 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} />
-                      {transcription.duration}
-                    </div>
-                  </td>
+                      <td className="py-3 px-4 text-gray-300 text-sm">
+                        <div className="flex items-center gap-2">
+                          <File size={14} />
+                          {transcription.audio_file_length 
+                            ? `${Math.round(transcription.audio_file_length * 100) / 100} MB`
+                            : 'N/A'
+                          }
+                        </div>
+                      </td>
                   <td className="py-3 px-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      transcription.status === 'Completata' 
-                        ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                        : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                    }`}>
-                      {transcription.status}
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                          {statusInfo.label}
                     </span>
                   </td>
                   <td className="py-3 px-4">
                     <button 
-                      onClick={() => openExistingTranscription(transcription.title)}
-                      className="px-3 py-1 bg-[#00D9AA] text-black rounded-lg text-sm font-medium hover:bg-[#00D9AA]/90 transition-colors"
-                    >
-                      Visualizza
+                          onClick={() => openExistingTranscription(transcription.id)}
+                          disabled={transcription.status === 'elaborazione'}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            transcription.status === 'elaborazione'
+                              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                              : 'bg-[#00D9AA] text-black hover:bg-[#00D9AA]/90'
+                          }`}
+                        >
+                          {transcription.status === 'elaborazione' ? 'Elaborazione...' : 'Visualizza'}
                     </button>
                   </td>
                 </tr>
-              ))}
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -561,21 +727,32 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
                     type="text"
                     value={transcriptionTitle}
                     onChange={(e) => setTranscriptionTitle(e.target.value)}
-                    onBlur={() => setIsEditingTranscriptionTitle(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') setIsEditingTranscriptionTitle(false)
+                    onBlur={async () => {
+                      setIsEditingTranscriptionTitle(false)
+                      await saveTranscriptionTitle(transcriptionTitle)
                     }}
-                    className="text-3xl font-bold bg-transparent border-b-2 border-[#00D9AA] text-white focus:outline-none"
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        setIsEditingTranscriptionTitle(false)
+                        await saveTranscriptionTitle(transcriptionTitle)
+                      }
+                    }}
+                    disabled={isSavingTranscriptionTitle}
+                    className="text-3xl font-bold bg-transparent border-b-2 border-[#00D9AA] text-white focus:outline-none disabled:opacity-50"
                     autoFocus
                   />
                 ) : (
                   <>
-                    <h1 className="text-3xl font-bold text-white">
+                    <h1 className="text-3xl font-bold text-white flex items-center gap-2">
                       {transcriptionTitle}
+                      {isSavingTranscriptionTitle && (
+                        <div className="w-4 h-4 border-2 border-[#00D9AA] border-t-transparent rounded-full animate-spin"></div>
+                      )}
                     </h1>
                     <button
                       onClick={() => setIsEditingTranscriptionTitle(true)}
-                      className="p-1 text-gray-400 hover:text-[#00D9AA] transition-colors opacity-0 group-hover:opacity-100"
+                      disabled={isSavingTranscriptionTitle}
+                      className="p-1 text-gray-400 hover:text-[#00D9AA] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-25"
                       title="Modifica titolo"
                     >
                       <Edit2 size={20} />
@@ -702,10 +879,20 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
                     <div className="w-6 h-6 border-2 border-[#00D9AA] border-t-transparent rounded-full animate-spin"></div>
                     <span className="text-white font-medium">Elaborazione in corso...</span>
                   </div>
+                  {processingProgress && (
+                    <div className="mb-4">
+                      <p className="text-[#00D9AA] text-sm font-medium">{processingProgress}</p>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
                     <div className="h-4 bg-gray-700 rounded animate-pulse w-3/4"></div>
                     <div className="h-4 bg-gray-700 rounded animate-pulse w-1/2"></div>
+                  </div>
+                  <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <p className="text-yellow-400 text-sm">
+                      ⚠️ Non chiudere questa pagina durante l&apos;elaborazione. Il processo può richiedere alcuni minuti.
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -833,53 +1020,24 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
                       
                       <div className="bg-gray-800/30 border border-gray-600 rounded-lg p-6">
                         <div className="prose prose-invert max-w-none">
-                          <div className="space-y-4 text-gray-300 leading-relaxed font-mono text-sm">
+                          <div className="space-y-4 text-gray-300 leading-relaxed">
                             <div className="border-b border-gray-600 pb-4 mb-4">
                               <p className="text-white font-semibold">{transcriptionTitle}</p>
-                              <p className="text-gray-400 text-xs mt-1">Durata: 2h 15min • Data: {new Date().toLocaleDateString('it-IT')}</p>
+                              <p className="text-gray-400 text-xs mt-1">
+                                {currentTranscriptionData?.audio_file_length 
+                                  ? `Dimensione: ${Math.round(currentTranscriptionData.audio_file_length * 100) / 100} MB`
+                                  : 'Dimensione: N/A'
+                                } • Data: {currentTranscriptionData?.created_at 
+                                  ? new Date(currentTranscriptionData.created_at).toLocaleDateString('it-IT')
+                                  : new Date().toLocaleDateString('it-IT')
+                                }
+                              </p>
                             </div>
                             
-                            <div className="space-y-3">
-                              <p><span className="text-gray-400">Partecipanti:</span> Marco Rossi, Laura Bianchi, Giuseppe Verdi</p>
-                              
-                              <div className="space-y-3 mt-6">
-                                <p><span className="text-[#00D9AA] font-medium">[00:00:15]</span> <span className="text-blue-400">Marco:</span> Buongiorno a tutti, iniziamo con il primo punto all ordine del giorno.</p>
-                                
-                                <p><span className="text-[#00D9AA] font-medium">[00:01:30]</span> <span className="text-purple-400">Laura:</span> Perfetto, per quanto riguarda il progetto Alpha, abbiamo completato la fase di analisi e siamo pronti per passare allo sviluppo.</p>
-                                
-                                <p><span className="text-[#00D9AA] font-medium">[00:02:45]</span> <span className="text-yellow-400">Giuseppe:</span> Ottimo lavoro Laura. Vorrei aggiungere che abbiamo identificato alcune criticità che dovremmo affrontare prima di procedere.</p>
-                                
-                                <p><span className="text-[#00D9AA] font-medium">[00:04:20]</span> <span className="text-blue-400">Marco:</span> Puoi essere più specifico Giuseppe?</p>
-                                
-                                <p><span className="text-[#00D9AA] font-medium">[00:05:10]</span> <span className="text-yellow-400">Giuseppe:</span> Certamente. Il primo problema riguarda l integrazione con il sistema legacy, il secondo è relativo alle performance durante i picchi di carico.</p>
-                                
-                                <p><span className="text-[#00D9AA] font-medium">[00:07:30]</span> <span className="text-purple-400">Laura:</span> Per l integrazione, propongo di creare un layer di astrazione che ci permetta di interfacciarci con il sistema esistente senza modificarlo drasticamente.</p>
+                            <div className="whitespace-pre-wrap text-sm">
+                              {transcriptionText}
                               </div>
-                              
-                              <div className="border-t border-gray-600 pt-4 mt-6">
-                                <p className="text-white font-semibold mb-3">DECISIONI PRESE:</p>
-                                <ul className="list-disc list-inside space-y-1 text-gray-300">
-                                  <li>Implementare layer di astrazione per integrazione legacy</li>
-                                  <li>Sviluppare sistema di caching distribuito</li>
-                                  <li>Ottimizzare query database prima del rilascio</li>
-                                </ul>
                               </div>
-                              
-                              <div className="border-t border-gray-600 pt-4 mt-4">
-                                <p className="text-white font-semibold mb-3">ACTION ITEMS:</p>
-                                <ul className="list-disc list-inside space-y-1 text-gray-300">
-                                  <li><span className="text-purple-400">Laura:</span> Progettare architettura layer di astrazione (Scadenza: 20/01/2024)</li>
-                                  <li><span className="text-yellow-400">Giuseppe:</span> Implementare sistema di caching (Scadenza: 25/01/2024)</li>
-                                  <li><span className="text-blue-400">Marco:</span> Coordinare ottimizzazione database (Scadenza: 22/01/2024)</li>
-                                </ul>
-                              </div>
-                              
-                              <div className="border-t border-gray-600 pt-4 mt-4">
-                                <p className="text-white font-semibold">PROSSIMA RIUNIONE:</p>
-                                <p className="text-[#00D9AA]">30/01/2024 ore 14:00</p>
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -897,20 +1055,57 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
                         <h3 className="text-xl font-semibold text-white mb-4">Metadati</h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Durata:</span>
-                            <span className="text-white">2h 15min</span>
+                            <span className="text-gray-400">Dimensione file:</span>
+                            <span className="text-white">
+                              {currentTranscriptionData?.audio_file_length 
+                                ? `${Math.round(currentTranscriptionData.audio_file_length * 100) / 100} MB`
+                                : 'N/A'
+                              }
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Formato:</span>
-                            <span className="text-white">MP3</span>
+                            <span className="text-gray-400">Data creazione:</span>
+                            <span className="text-white">
+                              {currentTranscriptionData?.created_at 
+                                ? new Date(currentTranscriptionData.created_at).toLocaleDateString('it-IT')
+                                : 'N/A'
+                              }
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Dimensione:</span>
-                            <span className="text-white">45.2 MB</span>
+                            <span className="text-gray-400">Stato:</span>
+                            <span className="text-white">{currentTranscriptionData?.status || 'N/A'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Precisione:</span>
-                            <span className="text-white">97.8%</span>
+                            <span className="text-gray-400">Confidenza lingua:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.language_confidence 
+                                  ? `${Math.round(data.language_confidence * 100)}%`
+                                  : 'N/A';
+                              })()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Modello acustico:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.acoustic_model?.replace('assemblyai_', 'AssemblyAI ') || 'N/A';
+                              })()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Speaker labels:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.speaker_labels !== undefined
+                                  ? (data.speaker_labels ? '✅ Attivo' : '❌ Disattivo')
+                                  : 'N/A';
+                              })()}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -919,19 +1114,72 @@ PROSSIMA RIUNIONE: 30/01/2024 ore 14:00`
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-400">Parole totali:</span>
-                            <span className="text-white">1,847</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.words && Array.isArray(data.words)
+                                  ? data.words.length
+                                  : 'N/A';
+                              })()}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Parlatori:</span>
-                            <span className="text-white">3</span>
+                            <span className="text-gray-400">Durata audio:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                if (data?.audio_duration) {
+                                  const totalSeconds = data.audio_duration;
+                                  const hours = Math.floor(totalSeconds / 3600);
+                                  const minutes = Math.floor((totalSeconds % 3600) / 60);
+                                  const seconds = Math.floor(totalSeconds % 60);
+                                  return hours > 0 
+                                    ? `${hours}h ${minutes}min ${seconds}s`
+                                    : `${minutes}min ${seconds}s`;
+                                }
+                                return 'N/A';
+                              })()}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Pause:</span>
-                            <span className="text-white">42</span>
+                            <span className="text-gray-400">Lingue rilevate:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.language_code?.toUpperCase() || 'N/A';
+                              })()}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Velocità media:</span>
-                            <span className="text-white">145 wpm</span>
+                            <span className="text-gray-400">Sentiment analysis:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.sentiment_analysis !== undefined
+                                  ? (data.sentiment_analysis ? '✅ Attivo' : '❌ Disattivo')
+                                  : 'N/A';
+                              })()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Auto highlights:</span>
+                            <span className="text-white">
+                              {(() => {
+                                const data = currentTranscriptionData?.data as AssemblyAIData | null;
+                                return data?.auto_highlights !== undefined
+                                  ? (data.auto_highlights ? '✅ Attivo' : '❌ Disattivo')
+                                  : 'N/A';
+                              })()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Ultima modifica:</span>
+                            <span className="text-white">
+                              {currentTranscriptionData?.edited_at 
+                                ? new Date(currentTranscriptionData.edited_at).toLocaleDateString('it-IT')
+                                : 'Mai'
+                              }
+                            </span>
                           </div>
                         </div>
                       </div>

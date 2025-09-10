@@ -189,58 +189,79 @@ export type Database = {
           },
         ]
       }
-      user_accounts: {
+      _lf_transcriptions: {
         Row: {
-          created_at: string | null
-          email: string
-          google_access_token: string | null
-          google_refresh_token: string
+          audio_file_length: number | null
+          audio_file_url: string | null
+          created_at: string
+          data: Json | null
+          edited_at: string | null
           id: string
-          scopes: string[] | null
-          token_expires_at: string | null
-          updated_at: string | null
+          specific_lfunction_id: number | null
+          status: string | null
+          title: string | null
           user_id: string | null
         }
         Insert: {
-          created_at?: string | null
-          email: string
-          google_access_token?: string | null
-          google_refresh_token: string
+          audio_file_length?: number | null
+          audio_file_url?: string | null
+          created_at?: string
+          data?: Json | null
+          edited_at?: string | null
           id?: string
-          scopes?: string[] | null
-          token_expires_at?: string | null
-          updated_at?: string | null
+          specific_lfunction_id?: number | null
+          status?: string | null
+          title?: string | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string | null
-          email?: string
-          google_access_token?: string | null
-          google_refresh_token?: string
+          audio_file_length?: number | null
+          audio_file_url?: string | null
+          created_at?: string
+          data?: Json | null
+          edited_at?: string | null
           id?: string
-          scopes?: string[] | null
-          token_expires_at?: string | null
-          updated_at?: string | null
+          specific_lfunction_id?: number | null
+          status?: string | null
+          title?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transcriptions_specific_lfunction_id_fkey"
+            columns: ["specific_lfunction_id"]
+            isOneToOne: false
+            referencedRelation: "link_specific_lfunction_user"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transcriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_profile: {
         Row: {
           created_at: string
           id: number
+          otp: string | null
           role: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
+          otp?: string | null
           role?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
+          otp?: string | null
           role?: string | null
           user_id?: string | null
         }
