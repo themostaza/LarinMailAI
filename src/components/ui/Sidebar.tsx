@@ -177,33 +177,49 @@ export default function Sidebar({ className = '', userProfile }: SidebarProps) {
           </Link>
         )}
 
-        {bottomItems.map((item) => (
-          <SidebarLink key={item.id} item={item} />
-        ))}
-        
-        {/* Logout Button */}
-        <form action={logoutAction}>
-          <motion.button
-            type="submit"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-gray-800 w-full"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-          <LogOut size={20} className="flex-shrink-0" />
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="text-sm font-medium whitespace-nowrap"
+        {/* Profile with Logout */}
+        <div className="flex items-center gap-1">
+          <Link href="/manage/profile" className="flex-1">
+            <motion.div
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                pathname === '/manage/profile'
+                  ? 'bg-[#00D9AA] text-black font-medium'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <User size={20} className="flex-shrink-0" />
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="truncate"
+                  >
+                    Profilo
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </Link>
+          
+          {/* Logout Icon - Only show when expanded */}
+          {!isCollapsed && (
+            <form action={logoutAction}>
+              <motion.button
+                type="submit"
+                className="p-2.5 rounded-lg transition-all duration-200 text-gray-400 hover:text-red-400 hover:bg-red-500/10"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="Logout"
               >
-                Logout
-              </motion.span>
-            )}
-          </AnimatePresence>
-          </motion.button>
-        </form>
+                <LogOut size={16} className="flex-shrink-0" />
+              </motion.button>
+            </form>
+          )}
+        </div>
 
       </div>
     </motion.aside>
