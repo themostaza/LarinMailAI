@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Settings, Filter, Database, FileText, Upload, Type, HelpCircle, X, Plus, Trash2 } from 'lucide-react'
 
-type ConfigTabType = 'parametri' | 'filtro email' | 'filtro AI' | 'rag' | 'bozza'
+type ConfigTabType = 'parametri' | 'filtro email' | 'filtro AI' | 'rag' | 'istruzioni'
 
 export default function ConfiguraSection() {
   const [activeConfigTab, setActiveConfigTab] = useState<ConfigTabType>('parametri')
@@ -16,6 +16,49 @@ export default function ConfiguraSection() {
   const [textContent, setTextContent] = useState('')
   const [faqTitle, setFaqTitle] = useState('')
   const [faqs, setFaqs] = useState<Array<{ question: string; answer: string }>>([{ question: '', answer: '' }])
+  // Stato Istruzioni
+  const [instructionModel, setInstructionModel] = useState('gpt-4')
+  const [instructionText, setInstructionText] = useState('')
+
+  // Stato Filtro Email
+  const [emailFilterEnabled, setEmailFilterEnabled] = useState(true)
+  const [selectedFolders, setSelectedFolders] = useState<string[]>(['INBOX'])
+  const [newFolderInput, setNewFolderInput] = useState('')
+  const [allowAddresses, setAllowAddresses] = useState('')
+  const [allowDomains, setAllowDomains] = useState('')
+  const [blockAddresses, setBlockAddresses] = useState('')
+  const [blockDomains, setBlockDomains] = useState('')
+  const [subjectInclude, setSubjectInclude] = useState('')
+  const [subjectExclude, setSubjectExclude] = useState('')
+  const [hasAttachments, setHasAttachments] = useState(false)
+  const [directOnly, setDirectOnly] = useState(false)
+  const [ignoreAutomations, setIgnoreAutomations] = useState(true)
+  const [timeFrom, setTimeFrom] = useState('09:00')
+  const [timeTo, setTimeTo] = useState('18:00')
+
+  const handleSaveEmailFilter = () => {
+    const config = {
+      enabled: emailFilterEnabled,
+      folders: { mode: 'include', list: (selectedFolders.length ? selectedFolders : ['INBOX']).map(f => f.trim()).filter(Boolean) },
+      allowlist: {
+        addresses: allowAddresses.split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+        domains: allowDomains.split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+      },
+      blocklist: {
+        addresses: blockAddresses.split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+        domains: blockDomains.split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+      },
+      criteria: {
+        subjectContains: subjectInclude.split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+        subjectExcludes: subjectExclude.split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+        hasAttachments,
+        timeWindow: { from: timeFrom, to: timeTo },
+        directOnly,
+        ignoreAutomations,
+      },
+    }
+    console.log('EmailFilterConfig:', config)
+  }
 
   // Funzioni helper per FAQ
   const addFaq = () => {
@@ -49,7 +92,7 @@ export default function ConfiguraSection() {
     { id: 'filtro email' as ConfigTabType, label: 'filtro email', icon: Filter },
     { id: 'filtro AI' as ConfigTabType, label: 'filtro AI', icon: Filter },
     { id: 'rag' as ConfigTabType, label: 'RAG', icon: Database },
-    { id: 'bozza' as ConfigTabType, label: 'Bozza', icon: FileText },
+    { id: 'istruzioni' as ConfigTabType, label: 'istruzioni', icon: FileText },
   ]
 
   return (
@@ -138,93 +181,167 @@ export default function ConfiguraSection() {
         {activeConfigTab === 'filtro email' && (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-white">filtro email</h3>
-            
-            {/* Banner In Lavorazione */}
-            <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 bg-orange-500/20 border border-orange-500/30 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-orange-400 text-sm">🚧</span>
+
+            {/* Toggle per attivare/disattivare il filtro email */}
+            <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-lg font-medium text-white mb-1">Filtro Email</h4>
+                  <p className="text-sm text-gray-400">Processa solo le email che rispettano questi criteri</p>
+                </div>
+                <button
+                  onClick={() => setEmailFilterEnabled(v => !v)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900 ${emailFilterEnabled ? 'bg-[#00D9AA]' : 'bg-gray-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${emailFilterEnabled ? 'translate-x-6' : 'translate-x-1'}`}></span>
+                </button>
+              </div>
+            </div>
+
+            {/* Selezione Cartelle (multi) */}
+            <div className={`bg-gray-900/50 border border-gray-700 rounded-xl p-6 ${!emailFilterEnabled ? 'opacity-60' : ''}`}>
+              <h4 className="text-lg font-medium text-white mb-4">Cartelle incluse</h4>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {selectedFolders.map((folder, idx) => (
+                    <span key={`${folder}-${idx}`} className="inline-flex items-center gap-2 px-2 py-1 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200">
+                      {folder}
+                      <button
+                        onClick={() => setSelectedFolders(prev => prev.filter((_, i) => i !== idx))}
+                        className="p-1 hover:bg-gray-700 rounded"
+                        disabled={!emailFilterEnabled}
+                        aria-label={`Rimuovi ${folder}`}
+                      >
+                        <X size={14} className="text-gray-400" />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedFolders.length === 0 && (
+                    <span className="text-sm text-gray-500">Nessuna cartella selezionata</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newFolderInput}
+                    onChange={e => setNewFolderInput(e.target.value)}
+                    placeholder="Es. INBOX, label:Clienti, Progetti/2025"
+                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    disabled={!emailFilterEnabled}
+                  />
+                  <button
+                    onClick={() => {
+                      const f = newFolderInput.trim()
+                      if (!f) return
+                      setSelectedFolders(prev => (prev.includes(f) ? prev : [...prev, f]))
+                      setNewFolderInput('')
+                    }}
+                    className="px-3 py-2 bg-[#00D9AA] text-black rounded-lg font-medium hover:bg-[#00D9AA]/90 transition-colors"
+                    disabled={!emailFilterEnabled}
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">Gmail usa etichette (es. INBOX), Outlook usa cartelle. Puoi aggiungerne più di una.</p>
+              </div>
+            </div>
+
+            {/* Allowlist / Blocklist */}
+            <div className={`bg-gray-900/50 border border-gray-700 rounded-xl p-6 ${!emailFilterEnabled ? 'opacity-60' : ''}`}>
+              <h4 className="text-lg font-medium text-white mb-4">Allowlist e Blocklist</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Indirizzi consentiti</label>
+                  <textarea
+                    value={allowAddresses}
+                    onChange={e => setAllowAddresses(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    rows={4}
+                    placeholder={"uno per riga\nanna@partner.com\n*@azienda.it"}
+                    disabled={!emailFilterEnabled}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Supporta wildcard: *@dominio.com</p>
                 </div>
                 <div>
-                  <h4 className="text-orange-400 font-medium">In Lavorazione!</h4>
-                  <p className="text-orange-300/80 text-sm">
-                    Stiamo sviluppando questa funzionalità. Sarà disponibile nei prossimi aggiornamenti.
-                  </p>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Domini consentiti</label>
+                  <textarea
+                    value={allowDomains}
+                    onChange={e => setAllowDomains(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    rows={4}
+                    placeholder={"uno per riga\npartner.com\nazienza.it"}
+                    disabled={!emailFilterEnabled}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Indirizzi bloccati</label>
+                  <textarea
+                    value={blockAddresses}
+                    onChange={e => setBlockAddresses(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    rows={4}
+                    placeholder={"uno per riga\nspam@example.com\n*@bad.com"}
+                    disabled={!emailFilterEnabled}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Domini bloccati</label>
+                  <textarea
+                    value={blockDomains}
+                    onChange={e => setBlockDomains(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    rows={4}
+                    placeholder={"uno per riga\nbad-domain.com\nspam.org"}
+                    disabled={!emailFilterEnabled}
+                  />
                 </div>
               </div>
             </div>
-            
-            {/* Contenuto Disabilitato */}
-            <div className="opacity-50 pointer-events-none">
-              {/* Toggle per attivare/disattivare il filtro email */}
-              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-medium text-white mb-1">Filtro Email</h4>
-                    <p className="text-sm text-gray-400">Processa solo le email che rispettano questi criteri</p>
-                  </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900">
-                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
-                  </button>
+
+            {/* Criteri di Filtraggio */}
+            <div className={`bg-gray-900/50 border border-gray-700 rounded-xl p-6 ${!emailFilterEnabled ? 'opacity-60' : ''}`}>
+              <h4 className="text-lg font-medium text-white mb-4">Criteri di Filtraggio</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Parole chiave nell&apos;oggetto (include)</label>
+                  <textarea
+                    value={subjectInclude}
+                    onChange={e => setSubjectInclude(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    rows={3}
+                    placeholder={"una per riga\nordine\nfattura"}
+                    disabled={!emailFilterEnabled}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Escludi se oggetto contiene</label>
+                  <textarea
+                    value={subjectExclude}
+                    onChange={e => setSubjectExclude(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                    rows={3}
+                    placeholder={"una per riga\nnewsletter\npromozione"}
+                    disabled={!emailFilterEnabled}
+                  />
                 </div>
               </div>
-
-              {/* Criteri di Filtraggio */}
-              <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-              <h4 className="text-lg font-medium text-white mb-4">Criteri di Filtraggio</h4>
-              <div className="space-y-4">
+              <div className="flex items-center justify-between mt-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Mittenti Autorizzati</label>
-                  <textarea
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                    rows={3}
-                    placeholder="mario.rossi@cliente.com, anna.verdi@partner.com, *@azienda-importante.com"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Un indirizzo email per riga. Usa * per wildcard (es: *@domain.com per tutti gli indirizzi di un dominio)
-                  </p>
+                  <label className="text-sm font-medium text-white">Solo con allegati</label>
+                  <p className="text-xs text-gray-400">Se attivo, considera solo email con allegati</p>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Domini Autorizzati</label>
-                  <textarea
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                    rows={3}
-                    placeholder="cliente.com, partner.it, azienda-importante.com"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Domini da cui accettare automaticamente le email
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Parole Chiave nell&apos;Oggetto</label>
-                  <textarea
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                    rows={3}
-                    placeholder="urgente, richiesta, preventivo, supporto, informazioni"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Email con queste parole chiave nell&apos;oggetto verranno processate
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Escludi Email con Oggetto</label>
-                  <textarea
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                    rows={3}
-                    placeholder="newsletter, promozione, spam, unsubscribe, noreply"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Email con queste parole chiave nell&apos;oggetto verranno ignorate
-                  </p>
-                </div>
+                <button
+                  onClick={() => setHasAttachments(v => !v)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900 ${hasAttachments ? 'bg-[#00D9AA]' : 'bg-gray-600'}`}
+                  disabled={!emailFilterEnabled}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasAttachments ? 'translate-x-6' : 'translate-x-1'}`}></span>
+                </button>
               </div>
             </div>
 
             {/* Filtri Avanzati */}
-            <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+            <div className={`bg-gray-900/50 border border-gray-700 rounded-xl p-6 ${!emailFilterEnabled ? 'opacity-60' : ''}`}>
               <h4 className="text-lg font-medium text-white mb-4">Filtri Avanzati</h4>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -232,8 +349,12 @@ export default function ConfiguraSection() {
                     <label className="text-sm font-medium text-white">Solo email dirette (non CC/BCC)</label>
                     <p className="text-xs text-gray-400">Processa solo le email dove sei il destinatario principale</p>
                   </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900">
-                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+                  <button
+                    onClick={() => setDirectOnly(v => !v)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900 ${directOnly ? 'bg-[#00D9AA]' : 'bg-gray-600'}`}
+                    disabled={!emailFilterEnabled}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${directOnly ? 'translate-x-6' : 'translate-x-1'}`}></span>
                   </button>
                 </div>
 
@@ -242,8 +363,12 @@ export default function ConfiguraSection() {
                     <label className="text-sm font-medium text-white">Ignora email automatiche</label>
                     <p className="text-xs text-gray-400">Escludi notifiche automatiche e email di sistema</p>
                   </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#00D9AA] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900">
-                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6"></span>
+                  <button
+                    onClick={() => setIgnoreAutomations(v => !v)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:ring-offset-2 focus:ring-offset-gray-900 ${ignoreAutomations ? 'bg-[#00D9AA]' : 'bg-gray-600'}`}
+                    disabled={!emailFilterEnabled}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${ignoreAutomations ? 'translate-x-6' : 'translate-x-1'}`}></span>
                   </button>
                 </div>
 
@@ -254,25 +379,57 @@ export default function ConfiguraSection() {
                       <label className="block text-xs text-gray-400 mb-1">Dalle</label>
                       <input
                         type="time"
+                        value={timeFrom}
+                        onChange={e => setTimeFrom(e.target.value)}
                         className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                        defaultValue="09:00"
+                        disabled={!emailFilterEnabled}
                       />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-400 mb-1">Alle</label>
                       <input
                         type="time"
+                        value={timeTo}
+                        onChange={e => setTimeTo(e.target.value)}
                         className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
-                        defaultValue="18:00"
+                        disabled={!emailFilterEnabled}
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Le email ricevute fuori da questo orario verranno ignorate
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Le email ricevute fuori da questo orario verranno ignorate</p>
                 </div>
               </div>
             </div>
+
+            {/* Azioni */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSaveEmailFilter}
+                className="px-4 py-2 bg-[#00D9AA] text-black rounded-lg font-medium hover:bg-[#00D9AA]/90 transition-colors"
+              >
+                Salva filtro
+              </button>
+              <button
+                onClick={() => {
+                  setEmailFilterEnabled(true)
+                  setSelectedFolders(['INBOX'])
+                  setNewFolderInput('')
+                  setAllowAddresses('')
+                  setAllowDomains('')
+                  setBlockAddresses('')
+                  setBlockDomains('')
+                  setSubjectInclude('')
+                  setSubjectExclude('')
+                  setHasAttachments(false)
+                  setDirectOnly(false)
+                  setIgnoreAutomations(true)
+                  setTimeFrom('09:00')
+                  setTimeTo('18:00')
+                }}
+                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                Reimposta
+              </button>
             </div>
           </div>
         )}
@@ -333,7 +490,7 @@ export default function ConfiguraSection() {
               <h4 className="text-lg font-medium text-white mb-4">Prompt di Discriminazione</h4>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Definisci come l&apos;AI deve discriminare tra email da processare e da filtrare
+                  Definisci come l&apos;AI deve discriminare tra email da processare e da filtrare.
                 </label>
                 <textarea
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent font-mono text-sm h-fit min-h-[400px]"
@@ -435,26 +592,67 @@ Rispondi solo con "PROCESSA" o "FILTRA" seguito da una breve motivazione.`}
           </div>
         )}
 
-        {activeConfigTab === 'bozza' && (
+        {activeConfigTab === 'istruzioni' && (
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-white">Template Risposte</h3>
+            <h3 className="text-xl font-semibold text-white">Istruzioni</h3>
             <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-              <h4 className="text-lg font-medium text-white mb-4">Template Personalizzati</h4>
+              <h4 className="text-lg font-medium text-white mb-4">Modello AI</h4>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Template Richiesta Informazioni</label>
-                  <textarea
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent font-mono"
-                    rows={4}
-                    placeholder="Gentile {{sender_name}}, grazie per la sua richiesta riguardo {{subject}}..."
-                  />
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Seleziona modello</label>
+                  <select
+                    value={instructionModel}
+                    onChange={(e) => setInstructionModel(e.target.value)}
+                    className="w-fit px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent"
+                  >
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    <option value="claude-3">Claude 3</option>
+                    <option value="gemini-pro">Gemini Pro</option>
+                  </select>
                 </div>
-                <div className="flex gap-3">
-                  <button className="px-4 py-2 bg-[#00D9AA] text-black rounded-lg font-medium hover:bg-[#00D9AA]/90 transition-colors">
-                    Salva Template
+                <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-4">
+                  <h5 className="text-sm font-medium text-white mb-3">Costi Token (per 1K token)</h5>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-400">Input:</span>
+                      <span className="text-white ml-2 font-mono">$0.03</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Output:</span>
+                      <span className="text-white ml-2 font-mono">$0.06</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Prezzi per GPT-4. I costi variano in base al modello selezionato.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
+              <h4 className="text-lg font-medium text-white mb-4">Istruzioni per l&apos;AI</h4>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Campo testo</label>
+                <textarea
+                  value={instructionText}
+                  onChange={(e) => setInstructionText(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D9AA] focus:border-transparent font-mono text-sm h-fit min-h-[300px]"
+                  rows={10}
+                  placeholder={`Spiega all'AI come comportarsi, ad esempio:\n- Rispondi in italiano formale\n- Riassumi in 3 bullet\n- Estrai i campi richiesti`}
+                />
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={() => console.log('Salva istruzioni:', { model: instructionModel, text: instructionText })}
+                    className="px-4 py-2 bg-[#00D9AA] text-black rounded-lg font-medium hover:bg-[#00D9AA]/90 transition-colors"
+                  >
+                    Salva
                   </button>
-                  <button className="px-4 py-2 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors">
-                    Test Template
+                  <button
+                    onClick={() => { setInstructionModel('gpt-4'); setInstructionText('') }}
+                    className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  >
+                    Reimposta
                   </button>
                 </div>
               </div>

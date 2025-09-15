@@ -39,6 +39,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      _lf_transcriptions: {
+        Row: {
+          audio_file_length: number | null
+          audio_file_url: string | null
+          created_at: string
+          data: Json | null
+          edited_at: string | null
+          id: string
+          specific_lfunction_id: number | null
+          status: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          audio_file_length?: number | null
+          audio_file_url?: string | null
+          created_at?: string
+          data?: Json | null
+          edited_at?: string | null
+          id?: string
+          specific_lfunction_id?: number | null
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          audio_file_length?: number | null
+          audio_file_url?: string | null
+          created_at?: string
+          data?: Json | null
+          edited_at?: string | null
+          id?: string
+          specific_lfunction_id?: number | null
+          status?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcriptions_specific_lfunction_id_fkey"
+            columns: ["specific_lfunction_id"]
+            isOneToOne: false
+            referencedRelation: "link_specific_lfunction_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       larin_functions: {
         Row: {
           body: Json | null
@@ -189,56 +236,77 @@ export type Database = {
           },
         ]
       }
-      _lf_transcriptions: {
+      pay_subscription: {
         Row: {
-          audio_file_length: number | null
-          audio_file_url: string | null
+          body: Json | null
           created_at: string
-          data: Json | null
           edited_at: string | null
           id: string
-          specific_lfunction_id: number | null
           status: string | null
-          title: string | null
+          stripe_id: string | null
           user_id: string | null
         }
         Insert: {
-          audio_file_length?: number | null
-          audio_file_url?: string | null
+          body?: Json | null
           created_at?: string
-          data?: Json | null
           edited_at?: string | null
           id?: string
-          specific_lfunction_id?: number | null
           status?: string | null
-          title?: string | null
+          stripe_id?: string | null
           user_id?: string | null
         }
         Update: {
-          audio_file_length?: number | null
-          audio_file_url?: string | null
+          body?: Json | null
           created_at?: string
-          data?: Json | null
           edited_at?: string | null
           id?: string
-          specific_lfunction_id?: number | null
           status?: string | null
-          title?: string | null
+          stripe_id?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      pay_transactions: {
+        Row: {
+          amount_in_eur: number | null
+          body: Json | null
+          created_at: string
+          id: string
+          specific_lfunction_id: number | null
+          stripe_id: string | null
+          subscription_id: string | null
+        }
+        Insert: {
+          amount_in_eur?: number | null
+          body?: Json | null
+          created_at?: string
+          id?: string
+          specific_lfunction_id?: number | null
+          stripe_id?: string | null
+          subscription_id?: string | null
+        }
+        Update: {
+          amount_in_eur?: number | null
+          body?: Json | null
+          created_at?: string
+          id?: string
+          specific_lfunction_id?: number | null
+          stripe_id?: string | null
+          subscription_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "transcriptions_specific_lfunction_id_fkey"
+            foreignKeyName: "pay_transactions_specific_lfunction_id_fkey"
             columns: ["specific_lfunction_id"]
             isOneToOne: false
             referencedRelation: "link_specific_lfunction_user"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transcriptions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "pay_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "pay_subscription"
             referencedColumns: ["id"]
           },
         ]

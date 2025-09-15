@@ -23,15 +23,6 @@ interface SidebarProps {
 
 const sidebarItems: SidebarItem[] = []
 
-const bottomItems: SidebarItem[] = [
-  {
-    id: 'profile',
-    label: 'Profilo',
-    href: '/manage/profile',
-    icon: User
-  }
-]
-
 export default function Sidebar({ className = '', userProfile }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()

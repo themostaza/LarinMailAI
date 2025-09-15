@@ -18,8 +18,6 @@ interface NuovaEsecuzioneSectionProps {
 }
 
 export default function NuovaEsecuzioneSection({ 
-  transcriptionTitle,
-  setTranscriptionTitle,
   uploadedFile,
   handleFileUpload,
   startTranscription,

@@ -1,7 +1,3 @@
-// Client-side functions per gestire le trascrizioni
-import { Tables } from '@/types/database.types'
-
-
 
 // Re-export delle Server Actions dal file separato
 export {

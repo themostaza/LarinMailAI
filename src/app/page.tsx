@@ -16,6 +16,14 @@ export default function Home() {
         </div>
         <div className="flex gap-4">
           <Link
+            href="/pricing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border border-gray-600 text-white px-6 py-2 font-semibold hover:bg-gray-800 transition-colors"
+          >
+            prezzi
+          </Link>
+          <Link
             href="/login"
             className="rounded-lg bg-[#00D9AA] text-black px-6 py-2 font-semibold hover:bg-[#00D9AA]/90 transition-colors"
           >
