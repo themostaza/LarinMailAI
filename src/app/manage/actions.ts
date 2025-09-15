@@ -74,30 +74,11 @@ export async function getUserCredits() {
     
     const supabase = await createSupabaseServerClientMutable()
     
-    // Recupera la prima subscription attiva dell'utente
-    const { data: subscription, error: subError } = await supabase
-      .from('pay_subscription')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .single()
-    
-    if (subError || !subscription) {
-      // Se non ha subscription attiva, i crediti sono 0
-      return { 
-        success: true, 
-        credits: 0.00,
-        error: null 
-      }
-    }
-    
-    // Calcola la somma di tutti gli importi delle transazioni per questa subscription
+    // Calcola la somma di TUTTE le transazioni dell'utente (subscription + one-time)
     const { data: transactions, error: transError } = await supabase
       .from('pay_transactions')
       .select('amount_in_eur')
-      .eq('subscription_id', subscription.id)
+      .eq('user_id', user.id)
     
     if (transError) {
       console.error('Errore nel recuperare le transazioni:', transError)

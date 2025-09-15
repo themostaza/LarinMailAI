@@ -275,6 +275,7 @@ export type Database = {
           specific_lfunction_id: number | null
           stripe_id: string | null
           subscription_id: string | null
+          user_id: string | null
         }
         Insert: {
           amount_in_eur?: number | null
@@ -284,6 +285,7 @@ export type Database = {
           specific_lfunction_id?: number | null
           stripe_id?: string | null
           subscription_id?: string | null
+          user_id?: string | null
         }
         Update: {
           amount_in_eur?: number | null
@@ -293,6 +295,7 @@ export type Database = {
           specific_lfunction_id?: number | null
           stripe_id?: string | null
           subscription_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -307,6 +310,13 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "pay_subscription"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
