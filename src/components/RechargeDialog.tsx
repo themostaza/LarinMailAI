@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, CreditCard, Euro } from 'lucide-react'
 import BillingInfoForm, { BillingInfo } from './BillingInfoForm'
+import { getUserLatestBillingData } from '@/app/manage/actions'
 
 interface RechargeDialogProps {
   isOpen: boolean
@@ -18,6 +19,8 @@ export default function RechargeDialog({ isOpen, onClose, currentCredits }: Rech
   const [paymentType, setPaymentType] = useState<'subscription' | 'one-time'>('subscription')
   const [showBillingForm, setShowBillingForm] = useState(false)
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null)
+  const [savedBillingData, setSavedBillingData] = useState<Partial<BillingInfo> | null>(null)
+  const [loadingBillingData, setLoadingBillingData] = useState(false)
 
   const presetAmounts = [10, 15, 25, 50]
 
@@ -36,10 +39,26 @@ export default function RechargeDialog({ isOpen, onClose, currentCredits }: Rech
     }
   }
 
-  const handleProceedToBilling = () => {
+  const handleProceedToBilling = async () => {
     if (selectedAmount < 10) {
       return
     }
+    
+    // Carica i dati di fatturazione salvati se non sono già stati caricati
+    if (!savedBillingData && !loadingBillingData) {
+      setLoadingBillingData(true)
+      try {
+        const result = await getUserLatestBillingData()
+        if (result.success && result.data) {
+          setSavedBillingData(result.data)
+        }
+      } catch (error) {
+        console.error('Errore nel caricare i dati di fatturazione:', error)
+      } finally {
+        setLoadingBillingData(false)
+      }
+    }
+    
     setShowBillingForm(true)
   }
 
@@ -81,6 +100,26 @@ export default function RechargeDialog({ isOpen, onClose, currentCredits }: Rech
     setShowBillingForm(false)
     setBillingInfo(null)
   }
+
+  // Carica i dati di fatturazione quando il dialog si apre
+  useEffect(() => {
+    if (isOpen && !savedBillingData && !loadingBillingData) {
+      const loadBillingData = async () => {
+        setLoadingBillingData(true)
+        try {
+          const result = await getUserLatestBillingData()
+          if (result.success && result.data) {
+            setSavedBillingData(result.data)
+          }
+        } catch (error) {
+          console.error('Errore nel caricare i dati di fatturazione:', error)
+        } finally {
+          setLoadingBillingData(false)
+        }
+      }
+      loadBillingData()
+    }
+  }, [isOpen, savedBillingData, loadingBillingData])
 
   return (
     <AnimatePresence>
@@ -244,6 +283,7 @@ export default function RechargeDialog({ isOpen, onClose, currentCredits }: Rech
                   onSubmit={handleBillingSubmit}
                   onCancel={handleBackToAmount}
                   isLoading={isProcessing}
+                  initialData={savedBillingData || undefined}
                 />
               )}
             </div>
@@ -261,13 +301,14 @@ export default function RechargeDialog({ isOpen, onClose, currentCredits }: Rech
                   </button>
                   <button
                     onClick={handleProceedToBilling}
-                    disabled={selectedAmount < 10 || isProcessing}
+                    disabled={selectedAmount < 10 || isProcessing || loadingBillingData}
                     className="flex-1 px-6 py-3 bg-[#00D9AA] text-black font-semibold rounded-lg hover:bg-[#00B890] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {paymentType === 'subscription' 
-                      ? `Continua - €${selectedAmount.toFixed(2)}/mese`
-                      : `Continua - €${selectedAmount.toFixed(2)}`
-                    }
+                    {loadingBillingData ? 'Caricamento...' : (
+                      paymentType === 'subscription' 
+                        ? `Continua - €${selectedAmount.toFixed(2)}/mese`
+                        : `Continua - €${selectedAmount.toFixed(2)}`
+                    )}
                   </button>
                 </div>
               </div>

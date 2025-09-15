@@ -25,17 +25,23 @@ interface BillingInfoFormProps {
   onSubmit: (billingInfo: BillingInfo) => void
   onCancel: () => void
   isLoading?: boolean
+  initialData?: Partial<BillingInfo>
 }
 
-export default function BillingInfoForm({ onSubmit, onCancel, isLoading = false }: BillingInfoFormProps) {
-  const [tipo, setTipo] = useState<'azienda' | 'privato'>('privato')
+export default function BillingInfoForm({ onSubmit, onCancel, isLoading = false, initialData }: BillingInfoFormProps) {
+  const [tipo, setTipo] = useState<'azienda' | 'privato'>(initialData?.tipo || 'privato')
   const [formData, setFormData] = useState<Partial<BillingInfo>>({
-    tipo: 'privato',
-    via: '',
-    numeroCivico: '',
-    cap: '',
-    provincia: '',
-    stato: 'Italia',
+    tipo: initialData?.tipo || 'privato',
+    nome: initialData?.nome || '',
+    cognome: initialData?.cognome || '',
+    ragioneSociale: initialData?.ragioneSociale || '',
+    codiceFiscale: initialData?.codiceFiscale || '',
+    partitaIva: initialData?.partitaIva || '',
+    via: initialData?.via || '',
+    numeroCivico: initialData?.numeroCivico || '',
+    cap: initialData?.cap || '',
+    provincia: initialData?.provincia || '',
+    stato: initialData?.stato || 'Italia',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
