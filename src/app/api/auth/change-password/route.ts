@@ -3,11 +3,11 @@ import { createSupabaseServerClientMutable } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { currentPassword, newPassword } = await request.json()
+    const { newPassword } = await request.json()
 
-    if (!currentPassword || !newPassword) {
+    if (!newPassword) {
       return NextResponse.json(
-        { error: 'Password attuale e nuova password sono obbligatorie' },
+        { error: 'La nuova password è obbligatoria' },
         { status: 400 }
       )
     }
@@ -31,20 +31,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verifica la password attuale tentando un login
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password: currentPassword
-    })
-
-    if (signInError) {
-      return NextResponse.json(
-        { error: 'Password attuale non corretta' },
-        { status: 400 }
-      )
-    }
-
-    // Aggiorna la password
+    // Aggiorna la password direttamente
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword
     })

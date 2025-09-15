@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { User, Lock, Eye, EyeOff } from 'lucide-react'
+import { User, Lock, Eye, EyeOff, CreditCard, Plus, History } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { getUserCredits } from '../actions'
+import RechargeDialog from '@/components/RechargeDialog'
 
 interface ProfilePageClientProps {
   user: SupabaseUser
@@ -12,20 +14,42 @@ interface ProfilePageClientProps {
 
 export default function ProfilePageClient({ user, profile }: ProfilePageClientProps) {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [credits, setCredits] = useState<number>(0)
+  const [loadingCredits, setLoadingCredits] = useState(true)
+  const [showRechargeDialog, setShowRechargeDialog] = useState(false)
 
   const isAdminRole = profile?.role === 'admin' || profile?.role === 'superadmin'
 
+  // Carica i crediti all'avvio
+  useEffect(() => {
+    const loadCredits = async () => {
+      setLoadingCredits(true)
+      try {
+        const result = await getUserCredits()
+        if (result.success) {
+          setCredits(result.credits)
+        } else {
+          console.error('Errore nel caricare i crediti:', result.error)
+        }
+      } catch (error) {
+        console.error('Errore nel caricare i crediti:', error)
+      } finally {
+        setLoadingCredits(false)
+      }
+    }
+
+    loadCredits()
+  }, [])
+
   const handlePasswordChange = async () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword) {
       setError('Tutti i campi sono obbligatori')
       return
     }
@@ -50,7 +74,6 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          currentPassword,
           newPassword,
         }),
       })
@@ -59,7 +82,6 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
 
       if (response.ok) {
         setSuccess('Password cambiata con successo!')
-        setCurrentPassword('')
         setNewPassword('')
         setConfirmPassword('')
         setTimeout(() => {
@@ -78,7 +100,6 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
 
   const closePasswordModal = () => {
     setShowPasswordModal(false)
-    setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
     setError(null)
@@ -100,10 +121,55 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
           </motion.div>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 space-y-6">
+          {/* Sezione Billing */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-[#00D9AA]/10 to-[#00B890]/10 border border-[#00D9AA]/30 rounded-xl p-6"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#00D9AA] rounded-full flex items-center justify-center">
+                    <CreditCard size={24} className="text-black" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-1">Crediti Disponibili</h3>
+                    <div className="flex items-center gap-2">
+                      {loadingCredits ? (
+                        <div className="animate-pulse bg-gray-700 h-6 w-16 rounded"></div>
+                      ) : (
+                        <span className="text-2xl font-bold text-[#00D9AA]">
+                          {credits.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowRechargeDialog(true)}
+                  className="flex items-center gap-2 bg-[#00D9AA] text-black px-4 py-2 rounded-lg font-medium hover:bg-[#00B890] transition-colors duration-200"
+                >
+                  <Plus size={16} />
+                  Ricarica
+                </button>
+              </div>
+              
+              <div className="flex justify-start">
+                <button className="flex items-center gap-2 text-gray-400 hover:text-[#00D9AA] transition-colors duration-200 text-sm">
+                  <History size={16} />
+                  Vedi abbonamenti e transazioni
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Sezione Profilo */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
             className="bg-gray-900 border border-gray-800 rounded-xl p-6"
           >
             <div className="flex items-center gap-4 mb-6">
@@ -123,12 +189,21 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
                 <label className="block text-sm font-medium text-white mb-2">
                   Email
                 </label>
-                <input
-                  type="email"
-                  value={user.email || ''}
-                  disabled
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
-                />
+                <div className="flex gap-3 items-end">
+                  <input
+                    type="email"
+                    value={user.email || ''}
+                    disabled
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
+                  />
+                  <button
+                    onClick={() => setShowPasswordModal(true)}
+                    className="flex items-center gap-2 bg-[#00D9AA] text-black px-4 py-2 rounded-lg font-medium hover:bg-[#00B890] transition-colors duration-200 whitespace-nowrap"
+                  >
+                    <Lock size={16} />
+                    Cambia Password
+                  </button>
+                </div>
               </div>
 
               {isAdminRole && (
@@ -140,20 +215,11 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
                     type="text"
                     value={profile?.role === 'superadmin' ? 'Super Amministratore' : 'Amministratore'}
                     disabled
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
+                    className="w-fit bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
                   />
                 </div>
               )}
 
-              <div className="pt-4 border-t border-gray-800">
-                <button
-                  onClick={() => setShowPasswordModal(true)}
-                  className="flex items-center gap-2 bg-[#00D9AA] text-black px-6 py-3 rounded-lg font-medium hover:bg-[#00B890] transition-colors duration-200"
-                >
-                  <Lock size={20} />
-                  Cambia Password
-                </button>
-              </div>
             </div>
           </motion.div>
         </div>
@@ -182,28 +248,6 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
             )}
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Password Attuale
-                </label>
-                <div className="relative">
-                  <input
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-white focus:outline-none focus:border-[#00D9AA]"
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                  >
-                    {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-white mb-2">
                   Nuova Password
@@ -268,6 +312,13 @@ export default function ProfilePageClient({ user, profile }: ProfilePageClientPr
           </motion.div>
         </div>
       )}
+
+      {/* Recharge Dialog */}
+      <RechargeDialog 
+        isOpen={showRechargeDialog}
+        onClose={() => setShowRechargeDialog(false)}
+        currentCredits={credits}
+      />
     </>
   )
 }
