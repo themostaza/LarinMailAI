@@ -8,26 +8,26 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header con Logo e CTA */}
-      <header className="flex justify-between items-center p-8 max-w-7xl mx-auto">
+      <header className="flex justify-between items-center p-4 sm:p-8 max-w-7xl mx-auto">
         <div className="flex items-center">
           <h1 className="text-2xl font-bold">
             Larin<span className="text-[#00D9AA]">AI</span>
           </h1>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3 sm:gap-4 items-center">
           <Link
             href="/pricing"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-gray-600 text-white px-6 py-2 font-semibold hover:bg-gray-800 transition-colors"
+            className="text-white hover:text-[#00D9AA] transition-colors text-sm sm:text-base"
           >
             prezzi
           </Link>
           <Link
             href="/login"
-            className="rounded-lg bg-[#00D9AA] text-black px-6 py-2 font-semibold hover:bg-[#00D9AA]/90 transition-colors"
+            className="rounded-lg bg-[#00D9AA] text-black px-2 py-1 font-semibold hover:bg-[#00D9AA]/90 transition-colors text-sm"
           >
-            accedi o registrati
+            accedi
           </Link>
         </div>
       </header>
