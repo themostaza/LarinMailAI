@@ -424,6 +424,7 @@ Elaborazione completata ma dati non disponibili.`
       functionName={functionName}
       specificId={resolvedParams.specific_id}
       loading={loading}
+      onNewTranscription={openNewTranscription}
     />
   )
 

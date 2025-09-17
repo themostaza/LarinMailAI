@@ -13,13 +13,15 @@ interface IntroSectionProps {
   functionName: string
   specificId: string
   loading: boolean
+  onNewTranscription?: () => void
 }
 
 export default function IntroSection({ 
   givenName, 
   functionName, 
   specificId, 
-  loading 
+  loading,
+  onNewTranscription 
 }: IntroSectionProps) {
   return (
     <motion.div
@@ -32,126 +34,148 @@ export default function IntroSection({
           <Mic size={32} className="text-[#00D9AA]" />
         </div>
         <h2 className="text-3xl font-bold text-white mb-2">
-          {loading ? 'Caricamento...' : givenName}
+          Trascrivi audio con l&apos;AI
         </h2>
-        {functionName && (
-          <p className="text-sm text-gray-400 mb-4">
-            {functionName} <span className="text-[#00D9AA]">• ID: {specificId}</span>
-          </p>
-        )}
-        <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-6">
           Trasforma automaticamente le registrazioni audio delle tue riunioni in trascrizioni testuali accurate, 
           poi genera riassunti strutturati con punti chiave, decisioni prese e action item assegnati.
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">Caratteristiche Principali</h3>
-          <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-[#00D9AA] rounded-full mt-2 flex-shrink-0"></div>
-              <span className="text-gray-300">Trascrizione automatica ad alta precisione</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-[#00D9AA] rounded-full mt-2 flex-shrink-0"></div>
-              <span className="text-gray-300">Riassunti strutturati con punti chiave</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-[#00D9AA] rounded-full mt-2 flex-shrink-0"></div>
-              <span className="text-gray-300">Identificazione automatica di decisioni e action item</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-[#00D9AA] rounded-full mt-2 flex-shrink-0"></div>
-              <span className="text-gray-300">Salvataggio automatico su Google Drive</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-[#00D9AA] rounded-full mt-2 flex-shrink-0"></div>
-              <span className="text-gray-300">Condivisione automatica con i partecipanti</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">Come Funziona</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#00D9AA]/20 border border-[#00D9AA]/30 rounded-full flex items-center justify-center text-sm font-bold text-[#00D9AA]">
-                1
-              </div>
-              <span className="text-gray-300">Carica la registrazione audio della riunione</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#00D9AA]/20 border border-[#00D9AA]/30 rounded-full flex items-center justify-center text-sm font-bold text-[#00D9AA]">
-                2
-              </div>
-              <span className="text-gray-300">L&apos;AI trascrive e analizza il contenuto</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#00D9AA]/20 border border-[#00D9AA]/30 rounded-full flex items-center justify-center text-sm font-bold text-[#00D9AA]">
-                3
-              </div>
-              <span className="text-gray-300">Genera verbali strutturati e li condivide</span>
-            </div>
-          </div>
+        
+        <div className="max-w-3xl mx-auto space-y-3 text-sm text-gray-500">
+          <p className="flex items-center justify-center gap-2">
+            GDPR compliant - Archiviazione dati sicura in EU tramite Supabase
+          </p>
+          <p className="flex items-center justify-center gap-2">
+            Powered by <a href="https://assemblyai.com" target="_blank" rel="noopener noreferrer" className="text-[#00D9AA] hover:underline">AssemblyAI</a> - 
+            <a href="https://www.assemblyai.com/security" target="_blank" rel="noopener noreferrer" className="text-[#00D9AA] hover:underline">Informazioni di sicurezza</a>
+          </p>
         </div>
       </div>
 
-      {/* Workflow Visual */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gray-800/30 border border-gray-700 rounded-xl p-6 text-center">
-          <div className="w-full h-32 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg mb-4 flex items-center justify-center">
-            <Mic size={48} className="text-blue-400" />
+      <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-8">
+        <h3 className="text-2xl font-semibold text-white mb-8 text-center">Come funziona</h3>
+        <div className="space-y-8 max-w-4xl mx-auto">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-[#00D9AA]/20 border border-[#00D9AA]/30 rounded-full flex items-center justify-center text-lg font-bold text-[#00D9AA] flex-shrink-0">
+              1
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h4 className="text-lg font-semibold text-white">Carica il tuo audio</h4>
+                <button 
+                  onClick={onNewTranscription}
+                  className="px-3 py-1 bg-[#00D9AA] hover:bg-[#00D9AA]/90 text-black rounded-lg transition-colors text-sm font-medium flex items-center gap-1"
+                >
+                  <span className="text-lg leading-none">+</span>
+                  Nuova trascrizione
+                </button>
+              </div>
+              <p className="text-gray-400 mb-1">Carica la registrazione audio della riunione in qualsiasi formato supportato</p>
+              <p className="text-gray-500 text-sm">Formati supportati: MP3, WAV, M4A, FLAC, OGG, WMA, AAC, WebM</p>
+            </div>
           </div>
-          <h4 className="text-white font-medium mb-2">Registrazione Audio</h4>
-          <p className="text-gray-400 text-sm">Carica file audio delle riunioni in qualsiasi formato supportato</p>
-        </div>
-        <div className="bg-gray-800/30 border border-gray-700 rounded-xl p-6 text-center">
-          <div className="w-full h-32 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-lg mb-4 flex items-center justify-center">
-            <FileText size={48} className="text-purple-400" />
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-[#00D9AA]/20 border border-[#00D9AA]/30 rounded-full flex items-center justify-center text-lg font-bold text-[#00D9AA] flex-shrink-0">
+              2
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">Trascrizione intelligente</h4>
+              <p className="text-gray-400">L&apos;AI trascrive e analizza automaticamente il contenuto con alta precisione e identifica gli interlocutori assegnando le frasi a diversi speaker anonimi</p>
+            </div>
           </div>
-          <h4 className="text-white font-medium mb-2">Elaborazione AI</h4>
-          <p className="text-gray-400 text-sm">Trascrizione automatica e analisi intelligente del contenuto</p>
-        </div>
-        <div className="bg-gray-800/30 border border-gray-700 rounded-xl p-6 text-center">
-          <div className="w-full h-32 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-lg mb-4 flex items-center justify-center">
-            <Users size={48} className="text-green-400" />
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-[#00D9AA]/20 border border-[#00D9AA]/30 rounded-full flex items-center justify-center text-lg font-bold text-[#00D9AA] flex-shrink-0">
+              3
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">Personalizza il risultato</h4>
+              <p className="text-gray-400 mb-3">Definisci cosa elaborare e personalizza il risultato finale con l&apos;AI utilizzando prompt personalizzati per ottenere esattamente il formato che desideri</p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-transparent border border-[#00D9AA] text-[#00D9AA]/70 rounded-lg text-sm font-medium">
+                  Verbale della riunione
+                </span>
+                <span className="px-3 py-1 bg-transparent border border-[#00D9AA] text-[#00D9AA]/70 rounded-lg text-sm font-medium">
+                  Riassunto
+                </span>
+                <span className="px-3 py-1 bg-transparent border border-[#00D9AA] text-[#00D9AA]/70 rounded-lg text-sm font-medium">
+                  Punti salienti
+                </span>
+                <span className="px-3 py-1 bg-transparent border border-[#00D9AA] text-[#00D9AA]/70 rounded-lg text-sm font-medium">
+                  Todo list
+                </span>
+                <span className="px-3 py-1 bg-transparent border border-[#00D9AA] text-[#00D9AA]/70 rounded-lg text-sm font-medium">
+                  Appunti
+                </span>
+                <span className="px-3 py-1 bg-transparent border border-[#00D9AA] text-[#00D9AA]/70 rounded-lg text-sm font-medium">
+                  Analisi decisioni
+                </span>
+              </div>
+            </div>
           </div>
-          <h4 className="text-white font-medium mb-2">Condivisione</h4>
-          <p className="text-gray-400 text-sm">Verbali salvati su Drive e condivisi automaticamente</p>
         </div>
       </div>
 
-      {/* Benefits Section */}
+      {/* Pricing Section */}
       <div className="bg-gradient-to-r from-[#00D9AA]/5 to-blue-500/5 border border-[#00D9AA]/20 rounded-xl p-8">
-        <h3 className="text-2xl font-bold text-white mb-6 text-center">Vantaggi della Trascrizione AI</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <CheckCircle size={20} className="text-[#00D9AA] flex-shrink-0" />
-              <span className="text-gray-300">Elimina la faticosa presa di appunti manuale</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle size={20} className="text-[#00D9AA] flex-shrink-0" />
-              <span className="text-gray-300">Garantisce che nessun dettaglio importante vada perso</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle size={20} className="text-[#00D9AA] flex-shrink-0" />
-              <span className="text-gray-300">Risparmia ore di lavoro post-riunione</span>
-            </div>
+        <h3 className="text-2xl font-bold text-white mb-8 text-center">Prezzi</h3>
+        <div className="max-w-4xl mx-auto space-y-8 text-left">
+          
+          {/* Trascrizione AI */}
+          <div>
+            <h4 className="text-xl font-semibold text-white">Trascrizione AI <span className="text-2xl font-bold text-[#00D9AA]">€0,37</span> <span className="text-gray-400">per ora trascritta</span></h4>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <CheckCircle size={20} className="text-[#00D9AA] flex-shrink-0" />
-              <span className="text-gray-300">Migliora il follow-up delle decisioni prese</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle size={20} className="text-[#00D9AA] flex-shrink-0" />
-              <span className="text-gray-300">Facilita la condivisione con team distribuiti</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle size={20} className="text-[#00D9AA] flex-shrink-0" />
-              <span className="text-gray-300">Crea un archivio consultabile delle riunioni</span>
+          
+          {/* Elaborazione AI */}
+          <div>
+            <h4 className="text-xl font-semibold text-white mb-6">Elaborazione AI</h4>
+            <div className="space-y-6">
+              
+              {/* Claude Sonnet 4.0 */}
+              <div className="border-b border-gray-700 pb-4">
+                <h5 className="text-lg font-medium text-white mb-3">Claude Sonnet 4.0</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-400">Input:</span>
+                    <span className="text-[#00D9AA] font-semibold ml-2">€0,004 per 1000 token</span>
+                    <span className="text-gray-500 block text-xs">(circa 750 parole)</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Output:</span>
+                    <span className="text-[#00D9AA] font-semibold ml-2">€0,020 per 1000 token</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* GPT-5 */}
+              <div className="border-b border-gray-700 pb-4">
+                <h5 className="text-lg font-medium text-white mb-3">GPT-5</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-400">Input:</span>
+                    <span className="text-blue-400 font-semibold ml-2">€0,0017 per 1000 token</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Output:</span>
+                    <span className="text-blue-400 font-semibold ml-2">€0,013 per 1000 token</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* GPT-4.1 */}
+              <div>
+                <h5 className="text-lg font-medium text-white mb-3">GPT-4.1</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-400">Input:</span>
+                    <span className="text-blue-400 font-semibold ml-2">€0,0026 per 1000 token</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Output:</span>
+                    <span className="text-blue-400 font-semibold ml-2">€0,0105 per 1000 token</span>
+                  </div>
+                </div>
+              </div>
+              
             </div>
           </div>
         </div>
