@@ -28,18 +28,18 @@ export default function Pricing() {
         {/* Sezione Abbonamento */}
         <div className="text-center mb-20">
           <h2 className="text-3xl sm:text-5xl font-bold mb-8">
-            <span className="text-[#00D9AA]">1 abbonamento</span>, 15+ strumenti AI
+            <span className="text-[#00D9AA]">1 abbonamento</span><br className="sm:hidden" /><span className="hidden sm:inline">, </span>15+ strumenti AI
           </h2>
           
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-6">
               <p className="text-gray-300 text-lg sm:text-xl leading-relaxed font-medium">
-                Carica crediti una-tantum o in abbonamento, paga <span className="font-bold text-[#00D9AA]">€6</span> ogni mese.
+                Carica crediti una-tantum o in abbonamento,<br className="sm:hidden" /> paga <span className="font-bold text-[#00D9AA]">€6</span> ogni mese.
               </p>
             </div>
             
             {/* Politica Crediti */}
-            <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-3 sm:p-4 mb-6">
+            <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-4 sm:p-6 mb-6">
               <div className="text-left">
                 <div className="font-medium text-gray-200 mb-3 text-sm sm:text-base">Usa al massimo i tuoi crediti! Ecco cosa sapere:</div>
                 <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-3">
@@ -114,18 +114,18 @@ export default function Pricing() {
         />
 
         {/* Tech Stack */}
-        <div className="mt-16 pt-12 border-t border-gray-800 text-center">
-          <p className="text-gray-500 text-sm mb-4">Sviluppato con</p>
-          <div className="flex items-center justify-center gap-8 text-gray-400">
-            <div className="text-sm">Next.js</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">Vercel</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">Supabase</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">Anthropic</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">GPTs</div>
+        <div className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-800 text-center px-4">
+          <p className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">Sviluppato con</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-8 text-gray-400">
+            <div className="text-xs sm:text-sm">Next.js</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">Vercel</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">Supabase</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">Anthropic</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">GPTs</div>
           </div>
         </div>
       </main>

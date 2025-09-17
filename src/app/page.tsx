@@ -67,18 +67,18 @@ export default function Home() {
         />
 
         {/* Tech Stack */}
-        <div className="mt-16 pt-12 border-t border-gray-800">
-          <p className="text-gray-500 text-sm mb-4">Sviluppato con</p>
-          <div className="flex items-center justify-center gap-8 text-gray-400">
-            <div className="text-sm">Next.js</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">Vercel</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">Supabase</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">Anthropic</div>
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="text-sm">GPTs</div>
+        <div className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-800 px-4">
+          <p className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">Sviluppato con</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-8 text-gray-400">
+            <div className="text-xs sm:text-sm">Next.js</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">Vercel</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">Supabase</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">Anthropic</div>
+            <div className="w-1 h-1 bg-gray-600 rounded-full hidden sm:block"></div>
+            <div className="text-xs sm:text-sm">GPTs</div>
           </div>
         </div>
       </main>
